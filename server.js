@@ -19,7 +19,7 @@ let comments = {};
 // 🌍 SOURCES
 const sources = [
   "https://www.france24.com/fr/rss",
-  "https://www.rfi.fr/fr/rss",
+  "https://www.rfi.fr/fr/rss"
 ];
 
 // 🌍 TRADUCTION API
