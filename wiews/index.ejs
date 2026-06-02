@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Global News Platform</title>
+
+  <link rel="manifest" href="/manifest.json">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial;
+      margin: 0;
+      background: #f2f2f2;
+    }
+
+    header {
+      background: #111;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .source {
+      font-size: 12px;
+      color: gray;
+    }
+
+    .content {
+      margin-top: 10px;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 10px;
+      color: blue;
+      text-decoration: none;
+    }
+
+    .like-btn {
+      background: #ff4d4d;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .likes {
+      margin-top: 5px;
+      font-size: 14px;
+    }
+
+    .trending {
+      color: red;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .comment-box {
+      margin-top: 10px;
+    }
+
+    input {
+      padding: 5px;
+      width: 70%;
+    }
+
+    .comment-btn {
+      padding: 5px;
+      background: #333;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .comment {
+      font-size: 13px;
+      margin-top: 5px;
+      background: #f9f9f9;
+      padding: 5px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  🌍 Global News Live Platform 🔥
+</header>
+
+<div class="container">
+
+  <% news.forEach(n => { %>
+
+    <div class="card">
+
+      <!-- 🔥 TRENDING -->
+      <% if ((likes[n.id] || 0) > 5) { %>
+        <div class="trending">🔥 TRENDING</div>
+      <% } %>
+
+      <div class="title"><%= n.title %></div>
+
+      <div class="source">
+        Source: <%= n.source %> | <%= n.date %>
+      </div>
+
+      <div class="content">
+        <%= n.content %>
+      </div>
+
+      <!-- ❤️ LIKES -->
+      <div class="likes">
+        ❤️ Likes: <%= likes[n.id] || 0 %>
+      </div>
+
+      <button class="like-btn" onclick="likeNews('<%= n.id %>')">
+        Like 👍
+      </button>
+
+      <br><br>
+
+      <!-- 💬 COMMENTAIRES -->
+      <strong>Commentaires :</strong>
+
+      <% (comments[n.id] || []).forEach(c => { %>
+        <div class="comment">💬 <%= c.text %></div>
+      <% }) %>
+
+      <div class="comment-box">
+        <input type="text" id="cmt-<%= n.id %>" placeholder="Écrire un commentaire">
+        <button class="comment-btn" onclick="sendComment('<%= n.id %>')">Envoyer</button>
+      </div>
+
+      <br>
+
+      <a href="<%= n.link %>" target="_blank">Lire plus</a>
+
+    </div>
+
+  <% }) %>
+
+</div>
+
+<script>
+function likeNews(id) {
+  fetch("/like", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id })
+  }).then(() => location.reload());
+}
+
+function sendComment(id) {
+  const input = document.getElementById("cmt-" + id);
+
+  fetch("/comment", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      id,
+      text: input.value
+    })
+  }).then(() => location.reload());
+}
+</script>
+
+</body>
+</html>

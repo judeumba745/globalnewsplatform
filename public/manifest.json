@@ -1,0 +1,15 @@
+{
+  "name": "Global News Platform",
+  "short_name": "NewsApp",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111",
+  "theme_color": "#111",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
