@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Global News</title>
 
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0d0d0d">
+
+<!-- iOS support -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="apple-touch-icon" href="/icon.png">
+
 <style>
 body {
   font-family: Arial;
@@ -247,6 +255,15 @@ function share(link){
     navigator.clipboard.writeText(link);
     alert("Lien copié !");
   }
+}
+
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js")
+      .then(() => console.log("PWA activée 🚀"))
+      .catch(err => console.log("Erreur PWA", err));
+  });
 }
 </script>
 
