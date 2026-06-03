@@ -21,37 +21,29 @@ const sources = [
 ];
 
 async function loadNews() {
-  let allNews = [];
+ let mediaUrl = "";
 
-  for (let url of sources) {
-    try {
-      const feed = await parser.parseURL(url);
+// 1. image ou vidéo directe (enclosure)
+if (item.enclosure?.url) {
+  mediaUrl = item.enclosure.url;
+}
 
-      for (let item of feed.items.slice(0, 15)) {
+// 2. media content RSS
+if (!mediaUrl && item["media:content"]?.url) {
+  mediaUrl = item["media:content"].url;
+}
 
-        // 🔥 récupération plus robuste des médias
-        let mediaUrl = "";
+// 3. image dans description HTML
+if (!mediaUrl && item.content) {
+  const imgMatch = item.content.match(/<img[^>]+src="([^"]+)"/);
+  if (imgMatch) mediaUrl = imgMatch[1];
+}
 
-        // 1. enclosure (souvent vidéo/image)
-        if (item.enclosure && item.enclosure.url) {
-          mediaUrl = item.enclosure.url;
-        }
-
-        // 2. media:content (RSS média)
-        if (!mediaUrl && item["media:content"]?.url) {
-          mediaUrl = item["media:content"].url;
-        }
-
-        // 3. media group (parfois utilisé)
-        if (!mediaUrl && item["media:group"]?.["media:content"]?.[0]?.url) {
-          mediaUrl = item["media:group"]["media:content"][0].url;
-        }
-
-        // 4. fallback dans le contenu HTML
-        if (!mediaUrl && item.content) {
-          const match = item.content.match(/src="([^"]+)"/);
-          if (match) mediaUrl = match[1];
-        }
+// 4. fallback description
+if (!mediaUrl && item.contentSnippet) {
+  const imgMatch = item.contentSnippet.match(/https?:\/\/[^\s]+(jpg|png|jpeg|gif)/);
+  if (imgMatch) mediaUrl = imgMatch[0];
+}
 
        let isVideo =
        mediaUrl.includes(".mp4") ||
