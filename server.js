@@ -16,7 +16,7 @@ let likes = {};
 let comments = {};
 
 let language = "fr";
-let lastloadedNews = [];
+let lastLoadedNews = [];
 
 const DATA_FILE = "./data.json";
 
@@ -42,7 +42,6 @@ loadData();
 // =======================
 async function translate(text, targetLang) {
   if (!text) return "";
-
   if (targetLang === "fr") return text;
 
   try {
@@ -106,11 +105,11 @@ async function loadNews() {
 
         let content = item.content || item.contentSnippet || item.description || "";
 
-        // 👍 init reactions
+        // init reactions
         if (!likes[item.link]) likes[item.link] = 0;
         if (!comments[item.link]) comments[item.link] = [];
 
-        // 🌍 TRANSLATION (TITLE + CONTENT ONLY)
+        // 🌍 TRANSLATION
         let titleFinal = item.title;
         let contentFinal = content;
 
@@ -153,10 +152,13 @@ app.get("/", (req, res) => {
   res.render("index", { news });
 });
 
-app.post("/set-language", (req, res) => {
+// 🔥 LANGUAGE CHANGE (FIX PROPRE)
+app.post("/set-language", async (req, res) => {
   language = req.body.lang || "fr";
-  loadNews();
-  res.json({ success: true });
+
+  await loadNews();
+
+  res.json({ success: true, lang: language });
 });
 
 // 👍 LIKE
@@ -184,6 +186,7 @@ app.post("/comment", (req, res) => {
   res.json({ success: true, count: comments[id].length });
 });
 
+// GET REACTIONS
 app.get("/reactions/:id", (req, res) => {
   const id = req.params.id;
 
@@ -193,6 +196,7 @@ app.get("/reactions/:id", (req, res) => {
   });
 });
 
+// GET COMMENTS
 app.get("/comments/:id", (req, res) => {
   const id = req.params.id;
   res.json(comments[id] || []);
