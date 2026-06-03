@@ -53,12 +53,11 @@ async function loadNews() {
           if (match) mediaUrl = match[1];
         }
 
-        let isVideo =
-          mediaUrl.includes(".mp4") ||
-          mediaUrl.includes("youtube") ||
-          mediaUrl.includes("youtu.be") ||
-          mediaUrl.includes("dailymotion") ||
-          mediaUrl.includes("video");
+       let isVideo =
+       mediaUrl.includes(".mp4") ||
+       mediaUrl.includes("youtube") ||
+       mediaUrl.includes("youtu.be") ||
+       mediaUrl.includes("dailymotion");
 
         let content = item.contentSnippet || item.content || item.description || "";
 
