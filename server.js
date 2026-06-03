@@ -35,8 +35,33 @@ function loadData() {
 loadData();
 
 const sources = [
+  // Monde
   "https://www.france24.com/fr/rss",
-  "https://www.rfi.fr/fr/rss"
+  "https://www.rfi.fr/fr/rss",
+  "https://feeds.bbci.co.uk/news/rss.xml",
+
+  // Sport
+  "https://feeds.bbci.co.uk/sport/rss.xml",
+  "https://www.skysports.com/rss/12040",
+  "https://www.espn.com/espn/rss/news",
+
+  // Football
+  "https://feeds.bbci.co.uk/sport/football/rss.xml",
+
+  // Basket
+  "https://feeds.bbci.co.uk/sport/basketball/rss.xml",
+
+  // Boxe
+  "https://feeds.bbci.co.uk/sport/boxing/rss.xml",
+
+  // Musique
+  "https://www.billboard.com/feed/",
+
+  // Tech
+  "https://www.theverge.com/rss/index.xml",
+
+  // Afrique
+  "https://www.jeuneafrique.com/feed/"
 ];
 
 async function loadNews() {
