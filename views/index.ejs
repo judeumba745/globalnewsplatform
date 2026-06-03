@@ -197,7 +197,7 @@
 
 <script>
 async function like(id, btn) {
-  if(btn.classList.contains('liked')) return;
+  if (btn.classList.contains('liked')) return;
 
   const res = await fetch('/like', {
     method: 'POST',
@@ -206,43 +206,64 @@ async function like(id, btn) {
   });
 
   const data = await res.json();
+
   const card = document.querySelector(`[data-id="${id}"]`);
   card.querySelector('.like-count').textContent = data.likes;
+
   btn.classList.add('liked');
 }
 
+// 💬 ouvrir commentaires + charger tout
 function toggleComment(id) {
   const box = document.getElementById('comments-'+id);
-  box.style.display = box.style.display === 'none'? 'block' : 'none';
+  const isOpen = box.style.display === 'block';
+
+  box.style.display = isOpen ? 'none' : 'block';
+
+  if (!isOpen) {
+    loadComments(id);
+  }
 }
 
+// 💬 envoyer commentaire
 async function comment(id) {
   const input = document.getElementById('input-'+id);
   const text = input.value.trim();
-  if(!text) return;
+  if (!text) return;
 
-  const res = await fetch('/comment', {
+  await fetch('/comment', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({id, text})
   });
 
+  input.value = '';
+
+  loadComments(id);
+}
+
+// 🔥 charger tous les commentaires (VISIBLE POUR TOUS)
+async function loadComments(id) {
+  const res = await fetch('/comments/' + id);
   const data = await res.json();
 
   const card = document.querySelector(`[data-id="${id}"]`);
   const list = card.querySelector('.comments-list');
 
-  const div = document.createElement('div');
-  div.className = 'comment';
-  div.textContent = text;
+  list.innerHTML = '';
 
-  list.appendChild(div);
-  card.querySelector('.comment-count').textContent = data.count;
-  input.value = '';
+  data.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'comment';
+    div.textContent = c.text;
+    list.appendChild(div);
+  });
+
+  card.querySelector('.comment-count').textContent = data.length;
 }
 
 function share(link) {
-  if(navigator.share) {
+  if (navigator.share) {
     navigator.share({title: 'News', url: link});
   } else {
     navigator.clipboard.writeText(link);
