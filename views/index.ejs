@@ -38,13 +38,13 @@
     position: absolute;
     right: 15px;
   }
-  #languageSelect {
-  margin-right: 8px;
-  padding: 6px 8px;
-  border-radius: 8px;
-  border: none;
-  font-size: 13px;
-  font-weight: bold;
+  #languageSelect { 
+    margin-right: 8px; 
+    padding: 6px 8px; 
+    border-radius: 8px; 
+    border: none; 
+    font-size: 13px; 
+    font-weight: bold; 
   }
   .ads-btn { 
     background: #1877f2; 
@@ -160,6 +160,11 @@
     font-size: 15px;
   }
 
+  /* ✅ CACHE LA BARRE GOOGLE TRANSLATE */
+  .goog-te-banner-frame { display: none !important; }
+  body { top: 0 !important; }
+  #google_translate_element { display: none !important; }
+
   /* ✅ RESPONSIVE TABLETTE/DESKTOP */
   @media (min-width: 768px) {
     .container { max-width: 700px; margin: 0 auto; padding: 20px; }
@@ -173,27 +178,20 @@
 <!-- ✅ HEADER PRO CENTRÉ -->
 <header>
   <div class="header-left">🌍 Global News Live</div>
-
   <div class="header-right">
-
     <select id="languageSelect" onchange="changeLanguage()">
       <option value="fr">🇫🇷 FR</option>
       <option value="en">🇬🇧 EN</option>
       <option value="pt">🇵🇹 PT</option>
       <option value="es">🇪🇸 ES</option>
     </select>
-
-    <a href="mailto:judeumba745@gmail.com?subject=Publicité sur Global News Live" class="ads-btn">
-      Publicité
-    </a>
-
+    <a href="mailto:judeumba745@gmail.com?subject=Publicité sur Global News Live" class="ads-btn">Publicité</a>
   </div>
 </header>
 
 <div class="container">
   <% news.forEach(n => { %>
     <div class="card" data-id="<%= n.id %>">
-      
       <% if(n.mediaType === 'video' && n.mediaUrl) { %>
         <% if(n.mediaUrl.includes('youtube') || n.mediaUrl.includes('youtu.be')) { %>
           <iframe src="<%= n.mediaUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/') %>" allowfullscreen></iframe>
@@ -207,11 +205,11 @@
       <% } else if(n.mediaType === 'image' && n.mediaUrl) { %>
         <img src="<%= n.mediaUrl %>" alt="<%= n.title %>">
       <% } %>
-
+      
       <div class="card-body">
         <div class="title"><%= n.title %></div>
         <div class="source">Source: <%= n.source %> | <%= new Date(n.date).toLocaleString('fr-FR') %></div>
-        <div class="content"><%= n.content %></div>
+        <div class="content"><%- n.content %></div>
 
         <div class="likes-count">
           👍 <span class="like-count"><%= n.likes %></span> J'aime
@@ -236,6 +234,20 @@
   <% }) %>
 </div>
 
+<!-- Google Translate caché -->
+<div id="google_translate_element"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'fr',
+    includedLanguages: 'fr,en,pt,es',
+    layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+    autoDisplay: false
+  }, 'google_translate_element');
+}
+</script>
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
 <script>
 async function like(id, btn) {
   const res = await fetch('/like', { 
@@ -243,7 +255,6 @@ async function like(id, btn) {
     headers: {'Content-Type':'application/json'}, 
     body: JSON.stringify({id}) 
   });
-
   const data = await res.json();
   const card = document.querySelector(`[data-id="${id}"]`);
   card.querySelector('.like-count').textContent = data.likes;
@@ -261,13 +272,11 @@ async function comment(id) {
   const input = document.getElementById('input-'+id);
   const text = input.value.trim();
   if (!text) return;
-
   await fetch('/comment', { 
     method: 'POST', 
     headers: {'Content-Type':'application/json'}, 
     body: JSON.stringify({id, text}) 
   });
-
   input.value = '';
   loadComments(id);
 }
@@ -275,19 +284,15 @@ async function comment(id) {
 async function loadComments(id) {
   const res = await fetch('/reactions/' + id);
   const data = await res.json();
-
   const card = document.querySelector(`[data-id="${id}"]`);
   const list = card.querySelector('.comments-list');
-
   list.innerHTML = '';
-
   data.comments.forEach(c => {
     const div = document.createElement('div');
     div.className = 'comment';
     div.textContent = c.text;
     list.appendChild(div);
   });
-
   card.querySelector('.comment-count').textContent = data.comments.length;
   card.querySelector('.like-count').textContent = data.likes;
 }
@@ -303,26 +308,28 @@ function share(link) {
 
 async function changeLanguage() {
   const lang = document.getElementById("languageSelect").value;
-
   localStorage.setItem("language", lang);
-
-  // 🔥 ENVOI AU SERVEUR (IMPORTANT pour traduction réelle)
-  await fetch("/set-language", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ lang })
-  });
-
-  // 🔥 recharge pour afficher les titres traduits
-  location.reload();
+  
+  // Déclenche Google Translate
+  const combo = document.querySelector('.goog-te-combo');
+  if(combo) {
+    combo.value = lang;
+    combo.dispatchEvent(new Event('change'));
+  }
 }
 
 window.onload = () => {
-  const savedLang = localStorage.getItem("language");
-
-  if (savedLang) {
-    document.getElementById("languageSelect").value = savedLang;
-  }
+  const savedLang = localStorage.getItem("language") || 'fr';
+  document.getElementById("languageSelect").value = savedLang;
+  
+  // Applique la langue sauvegardée au chargement
+  setTimeout(() => {
+    const combo = document.querySelector('.goog-te-combo');
+    if(combo && savedLang !== 'fr') {
+      combo.value = savedLang;
+      combo.dispatchEvent(new Event('change'));
+    }
+  }, 1000);
 };
 </script>
 </body>
