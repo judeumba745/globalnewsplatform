@@ -6,33 +6,114 @@
 <title>Global News</title>
 
 <style>
-body { font-family: Arial; margin:0; background:#f2f2f2; padding-top:70px; }
-
-header {
-  position: fixed;
-  top:0;
-  width:100%;
-  height:70px;
-  background:#111;
-  color:white;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  z-index:999;
+body {
+  font-family: Arial;
+  margin: 0;
+  background: #f2f2f2;
+  padding-top: 120px;
 }
 
-.container { padding:10px; max-width:700px; margin:auto; }
+/* ===== HEADER PRO FIXE ===== */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  background: #0d0d0d;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  z-index: 9999;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
 
-.card { background:white; margin-bottom:10px; border-radius:10px; overflow:hidden; }
+/* TITRE CENTRÉ */
+.header-title {
+  font-size: 22px;
+  font-weight: 900;
+  flex: 1;
+  text-align: center;
+  letter-spacing: 1px;
+}
 
-.title { font-size:18px; font-weight:bold; padding:10px; }
+/* BOUTON PUBLICITÉ */
+.ads-btn {
+  background: #1877f2;
+  color: white;
+  padding: 7px 12px;
+  border-radius: 18px;
+  font-size: 13px;
+  font-weight: bold;
+  text-decoration: none;
+}
 
-.content { padding:10px; }
+/* DOWNLOAD */
+.download-btn {
+  font-size: 20px;
+  color: white;
+  text-decoration: none;
+  padding: 6px 10px;
+}
 
-img, video, iframe { width:100%; }
+/* BARRE LANGUE */
+.lang-bar {
+  position: fixed;
+  top: 70px;
+  left: 0;
+  width: 100%;
+  background: #111;
+  padding: 8px;
+  display: flex;
+  justify-content: center;
+  z-index: 9998;
+}
 
-.actions { display:flex; justify-content:space-around; padding:10px; }
+.lang-bar select {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: none;
+  font-weight: bold;
+}
 
+/* CONTAINER */
+.container {
+  padding: 10px;
+  max-width: 700px;
+  margin: auto;
+}
+
+/* CARD */
+.card {
+  background: white;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: bold;
+  padding: 10px;
+}
+
+.content {
+  padding: 10px;
+}
+
+img, video, iframe {
+  width: 100%;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px;
+}
+
+/* GOOGLE TRANSLATE CACHE */
 #google_translate_element {
   position: fixed;
   bottom: 10px;
@@ -44,16 +125,33 @@ img, video, iframe { width:100%; }
 
 <body>
 
+<!-- ===== HEADER PRO ===== -->
 <header>
-  🌍 Global News
-  <select id="languageSelect" onchange="changeLanguage()" style="position:absolute; right:10px;">
-    <option value="fr">FR</option>
-    <option value="en">EN</option>
-    <option value="es">ES</option>
-    <option value="pt">PT</option>
-  </select>
+
+  <!-- DOWNLOAD -->
+  <a href="#" class="download-btn" onclick="alert('App déjà disponible 👍')">⬇️</a>
+
+  <!-- TITRE -->
+  <div class="header-title">🌍 GLOBAL NEWS</div>
+
+  <!-- PUBLICITÉ -->
+  <a href="mailto:judeumba745@gmail.com?subject=Publicité sur Global News" class="ads-btn">
+    Publicité
+  </a>
+
 </header>
 
+<!-- ===== LANGUE ===== -->
+<div class="lang-bar">
+  <select id="languageSelect" onchange="changeLanguage()">
+    <option value="fr">🇫🇷 FR</option>
+    <option value="en">🇬🇧 EN</option>
+    <option value="es">🇪🇸 ES</option>
+    <option value="pt">🇵🇹 PT</option>
+  </select>
+</div>
+
+<!-- ===== CONTENU ===== -->
 <div class="container">
 
 <% news.forEach(n => { %>
@@ -85,6 +183,7 @@ img, video, iframe { width:100%; }
 
 </div>
 
+<!-- ===== GOOGLE TRANSLATE ===== -->
 <div id="google_translate_element"></div>
 
 <script>
@@ -114,7 +213,6 @@ function changeLanguage() {
 window.onload = () => {
   const lang = localStorage.getItem("lang") || "fr";
   document.getElementById("languageSelect").value = lang;
-
   setTimeout(changeLanguage, 1000);
 };
 </script>
@@ -123,19 +221,35 @@ window.onload = () => {
 
 <script>
 async function like(id, btn){
-  const res = await fetch("/like",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id})});
+  const res = await fetch("/like", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({id})
+  });
+
   const data = await res.json();
   btn.innerText = "👍 " + data.likes;
 }
 
 function share(link){
-  navigator.share ? navigator.share({url:link}) : navigator.clipboard.writeText(link);
+  if(navigator.share){
+    navigator.share({url:link});
+  } else {
+    navigator.clipboard.writeText(link);
+    alert("Lien copié !");
+  }
 }
 
 async function comment(id){
   const input = document.getElementById("input-"+id);
-  await fetch("/comment",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,text:input.value})});
-  input.value="";
+
+  await fetch("/comment", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({id,text:input.value})
+  });
+
+  input.value = "";
 }
 </script>
 
