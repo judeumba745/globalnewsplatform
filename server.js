@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const Parser = require("rss-parser");
-const fs = require("fs"); // ✅ AJOUT
+const fs = require("fs");
 
 const app = express();
 const parser = new Parser();
@@ -12,15 +12,13 @@ app.set("view engine", "ejs");
 app.use(express.static("public"));
 
 let news = [];
-
-// ⚠️ mémoire serveur
 let likes = {};
 let comments = {};
 
-const DATA_FILE = "./data.json"; // ✅ AJOUT
+const DATA_FILE = "./data.json";
 
 // =======================
-// 🔥 SAUVEGARDE / CHARGEMENT
+// SAVE / LOAD
 // =======================
 function saveData() {
   fs.writeFileSync(DATA_FILE, JSON.stringify({ likes, comments }, null, 2));
@@ -34,7 +32,7 @@ function loadData() {
   }
 }
 
-loadData(); // ✅ CHARGER AU DÉMARRAGE
+loadData();
 
 const sources = [
   "https://www.france24.com/fr/rss",
@@ -67,8 +65,8 @@ async function loadNews() {
         allNews.push({
           id: item.link,
           title: item.title,
-          content: content,
-          mediaUrl: mediaUrl,
+          content,
+          mediaUrl,
           mediaType: isVideo ? 'video' : 'image',
           link: item.link,
           source: feed.title,
@@ -83,7 +81,6 @@ async function loadNews() {
   }
 
   news = allNews;
-  console.log("News mises à jour :", news.length);
 }
 
 loadNews();
@@ -93,23 +90,19 @@ app.get("/", (req, res) => {
   res.render("index", { news });
 });
 
-// =======================
-// 👍 LIKE (PERSISTANT)
-// =======================
+// 👍 LIKE
 app.post("/like", (req, res) => {
   const id = req.body.id;
 
   if (!likes[id]) likes[id] = 0;
   likes[id]++;
 
-  saveData(); // ✅ AJOUT
+  saveData();
 
   res.json({ success: true, likes: likes[id] });
 });
 
-// =======================
-// 💬 COMMENTAIRE (PERSISTANT)
-// =======================
+// 💬 COMMENTAIRE
 app.post("/comment", (req, res) => {
   const { id, text } = req.body;
 
@@ -117,12 +110,19 @@ app.post("/comment", (req, res) => {
 
   comments[id].push({ text, date: new Date() });
 
-  saveData(); // ✅ AJOUT
+  saveData();
 
   res.json({ success: true, count: comments[id].length });
 });
 
+
+// 🔥 AJOUT IMPORTANT : récupérer tous les commentaires
+app.get("/comments/:id", (req, res) => {
+  const id = req.params.id;
+  res.json(comments[id] || []);
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 News Platform running on port ${PORT}`);
+  console.log("🚀 News Platform running");
 });
