@@ -12,11 +12,9 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "cheerio": "^1.2.0",
     "cors": "^2.8.6",
     "ejs": "^6.0.1",
     "express": "^5.2.1",
-    "node-fetch": "^3.3.2",
     "rss-parser": "^3.13.0"
   }
 }
