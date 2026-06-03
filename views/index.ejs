@@ -2,197 +2,178 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Global News Live Platform</title>
-
 <style>
-  body {
-    font-family: Arial;
-    margin: 0;
-    background: #f2f2f2;
+    * { box-sizing: border-box; }
+  body { 
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
+    margin: 0; 
+    background: #f0f2f5; 
+    padding-top: 70px;
   }
 
-  /* ✅ HEADER PRO (FIXE + PLUS HAUT) */
-  header {
-    background: #111;
-    color: white;
-
-    height: 65px;
-    padding: 0 15px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
+  /* ✅ HEADER CENTRÉ + GROS */
+  header { 
+    background: #111; 
+    color: white; 
+    height: 70px; 
+    padding: 0 15px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
     z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  .header-left { 
+    font-size: 22px; 
+    font-weight: 800; 
+    letter-spacing: 0.5px;
+  }
+  .header-right { 
+    position: absolute;
+    right: 15px;
+  }
+  .ads-btn { 
+    background: #1877f2; 
+    color: white; 
+    text-decoration: none; 
+    padding: 7px 12px; 
+    border-radius: 18px; 
+    font-size: 13px; 
+    font-weight: bold; 
+  }
+  .ads-btn:hover { background: #0f5bd1; }
+
+  /* ✅ CONTAINER PLEIN ÉCRAN MOBILE */
+  .container { 
+    max-width: 100%; 
+    margin: 0; 
+    padding: 10px; 
   }
 
-  .header-left {
-    font-size: 18px;
-    font-weight: bold;
-  }
-
-  .header-right {
-    display: flex;
-    align-items: center;
-    margin-right: 25px;
-  }
-
-  .ads-btn {
-    background: #1877f2;
-    color: white;
-    text-decoration: none;
-
-    padding: 8px 14px;
-    border-radius: 20px;
-
-    font-size: 14px;
-    font-weight: bold;
-
-    transition: 0.2s;
-  }
-
-  .ads-btn:hover {
-    background: #0f5bd1;
-  }
-
-  /* ✅ CONTAINER AJUSTÉ */
-  .container {
-    max-width: 850px;
-    margin: auto;
-    padding: 100px 20px 20px;
-  }
-
-  .card {
-    background: white;
-    padding: 0;
-    margin-bottom: 25px;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    overflow: hidden;
-  }
-
-  .card-body {
-    padding: 15px;
-  }
-
-  .title {
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 8px;
-  }
-
-  .source {
-    font-size: 12px;
-    color: #666;
-    margin-bottom: 12px;
-  }
-
-  .card img {
+  /* ✅ CARD QUI REMPLIT LE FOND */
+  .card { 
+    background: white; 
+    padding: 0; 
+    margin-bottom: 12px; 
+    border-radius: 12px; 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+    overflow: hidden; 
     width: 100%;
-    max-height: 450px;
-    object-fit: cover;
+  }
+  .card-body { padding: 15px; }
+
+  /* ✅ TITRE PLUS GROS + LISIBLE */
+  .title { 
+    font-size: 20px; 
+    font-weight: 700; 
+    margin-bottom: 8px; 
+    line-height: 1.4;
+    color: #1c1e21;
+  }
+  
+  /* ✅ SOURCE PLUS VISIBLE */
+  .source { 
+    font-size: 13px; 
+    color: #65676b; 
+    margin-bottom: 12px; 
+    font-weight: 500;
   }
 
-  .content {
-    line-height: 1.7;
-    color: #333;
+  .card img, iframe, video { 
+    width: 100%; 
+    height: auto;
+    max-height: 400px;
+    object-fit: cover; 
+    display: block;
+  }
+
+  /* ✅ CONTENU TEXTE PLUS GROS */
+  .content { 
+    line-height: 1.7; 
+    color: #1c1e21; 
+    font-size: 16px; 
+    margin-bottom: 15px;
+  }
+  .content img { display: none; }
+
+  .likes-count { 
+    padding: 0 15px 8px; 
+    font-size: 14px; 
+    color: #65676b; 
+    font-weight: 500;
+  }
+
+  .actions { 
+    display: flex; 
+    border-top: 1px solid #e4e6eb; 
+    padding-top: 8px; 
+  }
+  .btn { 
+    flex: 1; 
+    background: none; 
+    border: none; 
+    padding: 10px; 
+    cursor: pointer; 
+    font-size: 15px; 
+    color: #65676b; 
+    border-radius: 6px; 
+    font-weight: 600;
+  }
+  .btn:hover { background: #f2f3f5; }
+  .btn.liked { color: #1877f2; }
+
+  .comments-box { padding: 0 15px 15px; }
+  .comment { 
+    background: #f2f3f5; 
+    padding: 10px 14px; 
+    border-radius: 18px; 
+    margin-top: 8px; 
+    font-size: 15px; 
+    line-height: 1.5;
+  }
+  .comment-input { 
+    display: flex; 
+    gap: 8px; 
+    margin-top: 10px; 
+  }
+  .comment-input input { 
+    flex: 1; 
+    border: none; 
+    background: #f2f3f5; 
+    padding: 10px 14px; 
+    border-radius: 20px; 
+    outline: none; 
     font-size: 15px;
-    margin-bottom: 15px;
   }
 
-  .content img {
-    display: none;
-  }
-
-  iframe, video {
-    width: 100%;
-    height: 450px;
-    border: none;
-    margin-bottom: 15px;
-  }
-
-  .likes-count {
-    padding: 0 15px 8px;
-    font-size: 13px;
-    color: #65676b;
-  }
-
-  .actions {
-    display: flex;
-    border-top: 1px solid #e4e6eb;
-    padding-top: 8px;
-  }
-
-  .btn {
-    flex: 1;
-    background: none;
-    border: none;
-    padding: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    color: #65676b;
-    border-radius: 5px;
-  }
-
-  .btn:hover {
-    background: #f2f3f5;
-  }
-
-  .btn.liked {
-    color: #1877f2;
-    font-weight: bold;
-  }
-
-  .comments-box {
-    padding: 0 15px 15px;
-  }
-
-  .comment {
-    background: #f2f3f5;
-    padding: 8px 12px;
-    border-radius: 18px;
-    margin-top: 8px;
-    font-size: 14px;
-  }
-
-  .comment-input {
-    display: flex;
-    gap: 8px;
-    margin-top: 10px;
-  }
-
-  .comment-input input {
-    flex: 1;
-    border: none;
-    background: #f2f3f5;
-    padding: 8px 12px;
-    border-radius: 18px;
-    outline: none;
+  /* ✅ RESPONSIVE TABLETTE/DESKTOP */
+  @media (min-width: 768px) {
+    .container { max-width: 700px; margin: 0 auto; padding: 20px; }
+    .header-left { font-size: 26px; }
+    .title { font-size: 24px; }
+    .content { font-size: 17px; }
   }
 </style>
 </head>
-
 <body>
-
-<!-- ✅ HEADER PRO -->
+<!-- ✅ HEADER PRO CENTRÉ -->
 <header>
-  <div class="header-left">🌍 Global News Live Platform</div>
-
+  <div class="header-left">🌍 Global News Live</div>
   <div class="header-right">
-    <a href="mailto:judeumba745@gmail.com?subject=Publicité sur Global News Live Platform" class="ads-btn">
-      Publicité
-    </a>
+    <a href="mailto:judeumba745@gmail.com?subject=Publicité sur Global News Live" class="ads-btn">Publicité</a>
   </div>
 </header>
 
 <div class="container">
   <% news.forEach(n => { %>
     <div class="card" data-id="<%= n.id %>">
-
+      
       <% if(n.mediaType === 'video' && n.mediaUrl) { %>
         <% if(n.mediaUrl.includes('youtube') || n.mediaUrl.includes('youtu.be')) { %>
           <iframe src="<%= n.mediaUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/') %>" allowfullscreen></iframe>
@@ -230,7 +211,6 @@
             <button onclick="comment('<%= n.id %>')">Envoyer</button>
           </div>
         </div>
-
       </div>
     </div>
   <% }) %>
@@ -238,61 +218,49 @@
 
 <script>
 async function like(id, btn) {
-  const res = await fetch('/like', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({id})
+  const res = await fetch('/like', { 
+    method: 'POST', 
+    headers: {'Content-Type':'application/json'}, 
+    body: JSON.stringify({id}) 
   });
-
   const data = await res.json();
-
   const card = document.querySelector(`[data-id="${id}"]`);
   card.querySelector('.like-count').textContent = data.likes;
+  btn.classList.add('liked');
 }
 
 function toggleComment(id) {
   const box = document.getElementById('comments-'+id);
   const isOpen = box.style.display === 'block';
-
   box.style.display = isOpen ? 'none' : 'block';
-
-  if (!isOpen) {
-    loadComments(id);
-  }
+  if (!isOpen) loadComments(id);
 }
 
 async function comment(id) {
   const input = document.getElementById('input-'+id);
   const text = input.value.trim();
   if (!text) return;
-
-  await fetch('/comment', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({id, text})
+  await fetch('/comment', { 
+    method: 'POST', 
+    headers: {'Content-Type':'application/json'}, 
+    body: JSON.stringify({id, text}) 
   });
-
   input.value = '';
-
   loadComments(id);
 }
 
 async function loadComments(id) {
   const res = await fetch('/reactions/' + id);
   const data = await res.json();
-
   const card = document.querySelector(`[data-id="${id}"]`);
   const list = card.querySelector('.comments-list');
-
   list.innerHTML = '';
-
   data.comments.forEach(c => {
     const div = document.createElement('div');
     div.className = 'comment';
     div.textContent = c.text;
     list.appendChild(div);
   });
-
   card.querySelector('.comment-count').textContent = data.comments.length;
   card.querySelector('.like-count').textContent = data.likes;
 }
@@ -306,6 +274,5 @@ function share(link) {
   }
 }
 </script>
-
 </body>
 </html>
