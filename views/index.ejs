@@ -33,20 +33,28 @@
     <div class="card" data-id="<%= n.id %>">
       
       <!-- 👇 ICI LE BLOC VIDÉO/IMAGE -->
-      <% if(n.mediaType === 'video' && n.mediaUrl) { %>
-        <% if(n.mediaUrl.includes('youtube') || n.mediaUrl.includes('youtu.be')) { %>
-          <iframe src="<%= n.mediaUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/') %>" allowfullscreen></iframe>
-        <% } else if(n.mediaUrl.includes('dailymotion')) { %>
-          <iframe src="<%= n.mediaUrl.replace('video/', 'embed/video/') %>" allowfullscreen></iframe>
-        <% } else { %>
-          <video controls preload="metadata">
-            <source src="<%= n.mediaUrl %>" type="video/mp4">
-          </video>
-        <% } %>
-      <% } else if(n.mediaType === 'image' && n.mediaUrl) { %>
-        <img src="<%= n.mediaUrl %>" alt="<%= n.title %>">
-      <% } %>
+     <% if(n.mediaType === 'video' && n.mediaUrl) { %>
 
+  <% if(n.mediaUrl.includes('youtu')) { %>
+
+    <iframe 
+      src="https://www.youtube.com/embed/<%= n.mediaUrl.split('v=')[1] || n.mediaUrl.split('/').pop() %>" 
+      allowfullscreen>
+    </iframe>
+
+  <% } else if(n.mediaUrl.includes('dailymotion')) { %>
+
+    <iframe src="<%= n.mediaUrl.replace('video/', 'embed/video/') %>" allowfullscreen></iframe>
+
+  <% } else { %>
+
+    <video controls preload="metadata">
+      <source src="<%= n.mediaUrl %>">
+    </video>
+
+  <% } %>
+
+<% } %>
       <div class="card-body">
         <div class="title"><%= n.title %></div>
         <div class="source">Source: <%= n.source %> | <%= new Date(n.date).toLocaleString('fr-FR') %></div>
