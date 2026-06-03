@@ -38,6 +38,14 @@
     position: absolute;
     right: 15px;
   }
+  #languageSelect {
+  margin-right: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: none;
+  font-size: 13px;
+  font-weight: bold;
+  }
   .ads-btn { 
     background: #1877f2; 
     color: white; 
@@ -165,8 +173,20 @@
 <!-- ✅ HEADER PRO CENTRÉ -->
 <header>
   <div class="header-left">🌍 Global News Live</div>
+
   <div class="header-right">
-    <a href="mailto:judeumba745@gmail.com?subject=Publicité sur Global News Live" class="ads-btn">Publicité</a>
+
+    <select id="languageSelect" onchange="changeLanguage()">
+      <option value="fr">🇫🇷 FR</option>
+      <option value="en">🇬🇧 EN</option>
+      <option value="pt">🇵🇹 PT</option>
+      <option value="es">🇪🇸 ES</option>
+    </select>
+
+    <a href="mailto:judeumba745@gmail.com?subject=Publicité sur Global News Live" class="ads-btn">
+      Publicité
+    </a>
+
   </div>
 </header>
 
@@ -273,6 +293,19 @@ function share(link) {
     alert('Lien copié!');
   }
 }
+
+function changeLanguage() {
+  const lang = document.getElementById("languageSelect").value;
+  localStorage.setItem("language", lang);
+}
+
+window.onload = () => {
+  const savedLang = localStorage.getItem("language");
+
+  if(savedLang){
+    document.getElementById("languageSelect").value = savedLang;
+  }
+};
 </script>
 </body>
 </html>
