@@ -2,335 +2,142 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Global News Live Platform</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global News</title>
+
 <style>
-    * { box-sizing: border-box; }
-  body { 
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
-    margin: 0; 
-    background: #f0f2f5; 
-    padding-top: 70px;
-  }
+body { font-family: Arial; margin:0; background:#f2f2f2; padding-top:70px; }
 
-  /* ✅ HEADER CENTRÉ + GROS */
-  header { 
-    background: #111; 
-    color: white; 
-    height: 70px; 
-    padding: 0 15px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center;
-    position: fixed; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    z-index: 1000;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  }
-  .header-left { 
-    font-size: 22px; 
-    font-weight: 800; 
-    letter-spacing: 0.5px;
-  }
-  .header-right { 
-    position: absolute;
-    right: 15px;
-  }
-  #languageSelect { 
-    margin-right: 8px; 
-    padding: 6px 8px; 
-    border-radius: 8px; 
-    border: none; 
-    font-size: 13px; 
-    font-weight: bold; 
-  }
-  .ads-btn { 
-    background: #1877f2; 
-    color: white; 
-    text-decoration: none; 
-    padding: 7px 12px; 
-    border-radius: 18px; 
-    font-size: 13px; 
-    font-weight: bold; 
-  }
-  .ads-btn:hover { background: #0f5bd1; }
+header {
+  position: fixed;
+  top:0;
+  width:100%;
+  height:70px;
+  background:#111;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+}
 
-  /* ✅ CONTAINER PLEIN ÉCRAN MOBILE */
-  .container { 
-    max-width: 100%; 
-    margin: 0; 
-    padding: 10px; 
-  }
+.container { padding:10px; max-width:700px; margin:auto; }
 
-  /* ✅ CARD QUI REMPLIT LE FOND */
-  .card { 
-    background: white; 
-    padding: 0; 
-    margin-bottom: 12px; 
-    border-radius: 12px; 
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
-    overflow: hidden; 
-    width: 100%;
-  }
-  .card-body { padding: 15px; }
+.card { background:white; margin-bottom:10px; border-radius:10px; overflow:hidden; }
 
-  /* ✅ TITRE PLUS GROS + LISIBLE */
-  .title { 
-    font-size: 20px; 
-    font-weight: 700; 
-    margin-bottom: 8px; 
-    line-height: 1.4;
-    color: #1c1e21;
-  }
-  
-  /* ✅ SOURCE PLUS VISIBLE */
-  .source { 
-    font-size: 13px; 
-    color: #65676b; 
-    margin-bottom: 12px; 
-    font-weight: 500;
-  }
+.title { font-size:18px; font-weight:bold; padding:10px; }
 
-  .card img, iframe, video { 
-    width: 100%; 
-    height: auto;
-    max-height: 400px;
-    object-fit: cover; 
-    display: block;
-  }
+.content { padding:10px; }
 
-  /* ✅ CONTENU TEXTE PLUS GROS */
-  .content { 
-    line-height: 1.7; 
-    color: #1c1e21; 
-    font-size: 16px; 
-    margin-bottom: 15px;
-  }
-  .content img { display: none; }
+img, video, iframe { width:100%; }
 
-  .likes-count { 
-    padding: 0 15px 8px; 
-    font-size: 14px; 
-    color: #65676b; 
-    font-weight: 500;
-  }
+.actions { display:flex; justify-content:space-around; padding:10px; }
 
-  .actions { 
-    display: flex; 
-    border-top: 1px solid #e4e6eb; 
-    padding-top: 8px; 
-  }
-  .btn { 
-    flex: 1; 
-    background: none; 
-    border: none; 
-    padding: 10px; 
-    cursor: pointer; 
-    font-size: 15px; 
-    color: #65676b; 
-    border-radius: 6px; 
-    font-weight: 600;
-  }
-  .btn:hover { background: #f2f3f5; }
-  .btn.liked { color: #1877f2; }
-
-  .comments-box { padding: 0 15px 15px; }
-  .comment { 
-    background: #f2f3f5; 
-    padding: 10px 14px; 
-    border-radius: 18px; 
-    margin-top: 8px; 
-    font-size: 15px; 
-    line-height: 1.5;
-  }
-  .comment-input { 
-    display: flex; 
-    gap: 8px; 
-    margin-top: 10px; 
-  }
-  .comment-input input { 
-    flex: 1; 
-    border: none; 
-    background: #f2f3f5; 
-    padding: 10px 14px; 
-    border-radius: 20px; 
-    outline: none; 
-    font-size: 15px;
-  }
-
-  /* ✅ CACHE LA BARRE GOOGLE TRANSLATE */
-  .goog-te-banner-frame { display: none !important; }
-  body { top: 0 !important; }
-  #google_translate_element { display: none !important; }
-
-  /* ✅ RESPONSIVE TABLETTE/DESKTOP */
-  @media (min-width: 768px) {
-    .container { max-width: 700px; margin: 0 auto; padding: 20px; }
-    .header-left { font-size: 26px; }
-    .title { font-size: 24px; }
-    .content { font-size: 17px; }
-  }
+#google_translate_element {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  opacity: 0.01;
+}
 </style>
 </head>
+
 <body>
-<!-- ✅ HEADER PRO CENTRÉ -->
+
 <header>
-  <div class="header-left">🌍 Global News Live</div>
-  <div class="header-right">
-    <select id="languageSelect" onchange="changeLanguage()">
-      <option value="fr">🇫🇷 FR</option>
-      <option value="en">🇬🇧 EN</option>
-      <option value="pt">🇵🇹 PT</option>
-      <option value="es">🇪🇸 ES</option>
-    </select>
-    <a href="mailto:judeumba745@gmail.com?subject=Publicité sur Global News Live" class="ads-btn">Publicité</a>
-  </div>
+  🌍 Global News
+  <select id="languageSelect" onchange="changeLanguage()" style="position:absolute; right:10px;">
+    <option value="fr">FR</option>
+    <option value="en">EN</option>
+    <option value="es">ES</option>
+    <option value="pt">PT</option>
+  </select>
 </header>
 
 <div class="container">
-  <% news.forEach(n => { %>
-    <div class="card" data-id="<%= n.id %>">
-      <% if(n.mediaType === 'video' && n.mediaUrl) { %>
-        <% if(n.mediaUrl.includes('youtube') || n.mediaUrl.includes('youtu.be')) { %>
-          <iframe src="<%= n.mediaUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/') %>" allowfullscreen></iframe>
-        <% } else if(n.mediaUrl.includes('dailymotion')) { %>
-          <iframe src="<%= n.mediaUrl.replace('video/', 'embed/video/') %>" allowfullscreen></iframe>
-        <% } else { %>
-          <video controls preload="metadata">
-            <source src="<%= n.mediaUrl %>" type="video/mp4">
-          </video>
-        <% } %>
-      <% } else if(n.mediaType === 'image' && n.mediaUrl) { %>
-        <img src="<%= n.mediaUrl %>" alt="<%= n.title %>">
-      <% } %>
-      
-      <div class="card-body">
-        <div class="title"><%= n.title %></div>
-        <div class="source">Source: <%= n.source %> | <%= new Date(n.date).toLocaleString('fr-FR') %></div>
-        <div class="content"><%- n.content %></div>
 
-        <div class="likes-count">
-          👍 <span class="like-count"><%= n.likes %></span> J'aime
-          <span style="float:right"><span class="comment-count"><%= n.comments %></span> commentaires</span>
-        </div>
+<% news.forEach(n => { %>
+  <div class="card" data-id="<%= n.id %>">
 
-        <div class="actions">
-          <button class="btn like-btn" onclick="like('<%= n.id %>', this)">👍 J'aime</button>
-          <button class="btn" onclick="toggleComment('<%= n.id %>')">💬 Commenter</button>
-          <button class="btn" onclick="share('<%= n.link %>')">↗️ Partager</button>
-        </div>
+    <% if(n.mediaType === 'video') { %>
+      <iframe src="<%= n.mediaUrl %>"></iframe>
+    <% } else if(n.mediaUrl) { %>
+      <img src="<%= n.mediaUrl %>">
+    <% } %>
 
-        <div class="comments-box" id="comments-<%= n.id %>" style="display:none">
-          <div class="comments-list"></div>
-          <div class="comment-input">
-            <input type="text" placeholder="Écris un commentaire..." id="input-<%= n.id %>">
-            <button onclick="comment('<%= n.id %>')">Envoyer</button>
-          </div>
-        </div>
-      </div>
+    <div class="title"><%= n.title %></div>
+    <div class="content"><%- n.content %></div>
+
+    <div class="actions">
+      <button onclick="like('<%= n.id %>', this)">👍 <%= n.likes %></button>
+      <button onclick="toggleComment('<%= n.id %>')">💬</button>
+      <button onclick="share('<%= n.link %>')">↗️</button>
     </div>
-  <% }) %>
+
+    <div id="comments-<%= n.id %>" style="display:none;">
+      <div class="comments-list"></div>
+      <input id="input-<%= n.id %>" placeholder="commenter...">
+      <button onclick="comment('<%= n.id %>')">Envoyer</button>
+    </div>
+
+  </div>
+<% }) %>
+
 </div>
 
-<!-- Google Translate caché -->
 <div id="google_translate_element"></div>
-<script type="text/javascript">
+
+<script>
 function googleTranslateElementInit() {
   new google.translate.TranslateElement({
     pageLanguage: 'fr',
-    includedLanguages: 'fr,en,pt,es',
-    layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-    autoDisplay: false
+    includedLanguages: 'fr,en,es,pt'
   }, 'google_translate_element');
 }
-</script>
-<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-<script>
-async function like(id, btn) {
-  const res = await fetch('/like', { 
-    method: 'POST', 
-    headers: {'Content-Type':'application/json'}, 
-    body: JSON.stringify({id}) 
-  });
-  const data = await res.json();
-  const card = document.querySelector(`[data-id="${id}"]`);
-  card.querySelector('.like-count').textContent = data.likes;
-  btn.classList.add('liked');
-}
-
-function toggleComment(id) {
-  const box = document.getElementById('comments-'+id);
-  const isOpen = box.style.display === 'block';
-  box.style.display = isOpen ? 'none' : 'block';
-  if (!isOpen) loadComments(id);
-}
-
-async function comment(id) {
-  const input = document.getElementById('input-'+id);
-  const text = input.value.trim();
-  if (!text) return;
-  await fetch('/comment', { 
-    method: 'POST', 
-    headers: {'Content-Type':'application/json'}, 
-    body: JSON.stringify({id, text}) 
-  });
-  input.value = '';
-  loadComments(id);
-}
-
-async function loadComments(id) {
-  const res = await fetch('/reactions/' + id);
-  const data = await res.json();
-  const card = document.querySelector(`[data-id="${id}"]`);
-  const list = card.querySelector('.comments-list');
-  list.innerHTML = '';
-  data.comments.forEach(c => {
-    const div = document.createElement('div');
-    div.className = 'comment';
-    div.textContent = c.text;
-    list.appendChild(div);
-  });
-  card.querySelector('.comment-count').textContent = data.comments.length;
-  card.querySelector('.like-count').textContent = data.likes;
-}
-
-function share(link) {
-  if (navigator.share) {
-    navigator.share({title: 'News', url: link});
-  } else {
-    navigator.clipboard.writeText(link);
-    alert('Lien copié!');
-  }
-}
-
-async function changeLanguage() {
+function changeLanguage() {
   const lang = document.getElementById("languageSelect").value;
-  localStorage.setItem("language", lang);
-  
-  // Déclenche Google Translate
-  const combo = document.querySelector('.goog-te-combo');
-  if(combo) {
-    combo.value = lang;
-    combo.dispatchEvent(new Event('change'));
+  localStorage.setItem("lang", lang);
+
+  function apply() {
+    const combo = document.querySelector(".goog-te-combo");
+    if (combo) {
+      combo.value = lang;
+      combo.dispatchEvent(new Event("change"));
+    } else {
+      setTimeout(apply, 500);
+    }
   }
+  apply();
 }
 
 window.onload = () => {
-  const savedLang = localStorage.getItem("language") || 'fr';
-  document.getElementById("languageSelect").value = savedLang;
-  
-  // Applique la langue sauvegardée au chargement
-  setTimeout(() => {
-    const combo = document.querySelector('.goog-te-combo');
-    if(combo && savedLang !== 'fr') {
-      combo.value = savedLang;
-      combo.dispatchEvent(new Event('change'));
-    }
-  }, 1000);
+  const lang = localStorage.getItem("lang") || "fr";
+  document.getElementById("languageSelect").value = lang;
+
+  setTimeout(changeLanguage, 1000);
 };
 </script>
+
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+<script>
+async function like(id, btn){
+  const res = await fetch("/like",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id})});
+  const data = await res.json();
+  btn.innerText = "👍 " + data.likes;
+}
+
+function share(link){
+  navigator.share ? navigator.share({url:link}) : navigator.clipboard.writeText(link);
+}
+
+async function comment(id){
+  const input = document.getElementById("input-"+id);
+  await fetch("/comment",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,text:input.value})});
+  input.value="";
+}
+</script>
+
 </body>
 </html>
