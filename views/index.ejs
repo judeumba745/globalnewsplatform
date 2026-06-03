@@ -11,13 +11,17 @@
     background: #f2f2f2;
   }
 
-  /* ✅ HEADER FIXE */
+  /* ✅ HEADER PRO (FIXE + PLUS HAUT) */
   header {
     background: #111;
     color: white;
-    padding: 15px;
-    text-align: center;
-    font-size: 20px;
+
+    height: 65px;
+    padding: 0 15px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
     position: fixed;
     top: 0;
@@ -26,12 +30,40 @@
     z-index: 1000;
   }
 
+  .header-left {
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    margin-right: 25px;
+  }
+
+  .ads-btn {
+    background: #1877f2;
+    color: white;
+    text-decoration: none;
+
+    padding: 8px 14px;
+    border-radius: 20px;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    transition: 0.2s;
+  }
+
+  .ads-btn:hover {
+    background: #0f5bd1;
+  }
+
+  /* ✅ CONTAINER AJUSTÉ */
   .container {
     max-width: 850px;
     margin: auto;
-
-    /* ✅ IMPORTANT : espace pour le header fixe */
-    padding: 90px 20px 20px;
+    padding: 100px 20px 20px;
   }
 
   .card {
@@ -146,7 +178,16 @@
 
 <body>
 
-<header>🌍 Global News Live Platform</header>
+<!-- ✅ HEADER PRO -->
+<header>
+  <div class="header-left">🌍 Global News Live Platform</div>
+
+  <div class="header-right">
+    <a href="mailto:judeumba745@gmail.com?subject=Publicité sur Global News Live Platform" class="ads-btn">
+      Publicité
+    </a>
+  </div>
+</header>
 
 <div class="container">
   <% news.forEach(n => { %>
@@ -209,7 +250,6 @@ async function like(id, btn) {
   card.querySelector('.like-count').textContent = data.likes;
 }
 
-// 💬 ouvrir commentaires + charger tout
 function toggleComment(id) {
   const box = document.getElementById('comments-'+id);
   const isOpen = box.style.display === 'block';
@@ -221,7 +261,6 @@ function toggleComment(id) {
   }
 }
 
-// 💬 envoyer commentaire
 async function comment(id) {
   const input = document.getElementById('input-'+id);
   const text = input.value.trim();
@@ -238,7 +277,6 @@ async function comment(id) {
   loadComments(id);
 }
 
-// 🔥 SYNC GLOBAL (likes + comments)
 async function loadComments(id) {
   const res = await fetch('/reactions/' + id);
   const data = await res.json();
@@ -259,7 +297,6 @@ async function loadComments(id) {
   card.querySelector('.like-count').textContent = data.likes;
 }
 
-// 🔗 partager
 function share(link) {
   if (navigator.share) {
     navigator.share({title: 'News', url: link});
