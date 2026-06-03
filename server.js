@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const Parser = require("rss-parser");
+const fs = require("fs"); // ✅ AJOUT
 
 const app = express();
 const parser = new Parser();
@@ -11,9 +12,29 @@ app.set("view engine", "ejs");
 app.use(express.static("public"));
 
 let news = [];
-// ⚠️ Render Free = mémoire effacée à chaque redémarrage. Compteurs repartent à 0
+
+// ⚠️ mémoire serveur
 let likes = {};
 let comments = {};
+
+const DATA_FILE = "./data.json"; // ✅ AJOUT
+
+// =======================
+// 🔥 SAUVEGARDE / CHARGEMENT
+// =======================
+function saveData() {
+  fs.writeFileSync(DATA_FILE, JSON.stringify({ likes, comments }, null, 2));
+}
+
+function loadData() {
+  if (fs.existsSync(DATA_FILE)) {
+    const data = JSON.parse(fs.readFileSync(DATA_FILE));
+    likes = data.likes || {};
+    comments = data.comments || {};
+  }
+}
+
+loadData(); // ✅ CHARGER AU DÉMARRAGE
 
 const sources = [
   "https://www.france24.com/fr/rss",
@@ -22,27 +43,33 @@ const sources = [
 
 async function loadNews() {
   let allNews = [];
+
   for (let url of sources) {
     try {
       const feed = await parser.parseURL(url);
+
       for (let item of feed.items.slice(0, 15)) {
         let media = item['media:content'] || [item.enclosure] || [];
         let mediaUrl = media[0]?.url || item.enclosure?.url || "";
         let mediaType = media[0]?.type || item.enclosure?.type || "";
 
-        let isVideo = mediaType.includes('video') || mediaUrl.includes('.mp4') || mediaUrl.includes('youtube') || mediaUrl.includes('dailymotion');
+        let isVideo =
+          mediaType.includes('video') ||
+          mediaUrl.includes('.mp4') ||
+          mediaUrl.includes('youtube') ||
+          mediaUrl.includes('dailymotion');
 
         let content = item.content || item.contentSnippet || item.description || "";
 
-        if(!likes[item.link]) likes[item.link] = 0;
-        if(!comments[item.link]) comments[item.link] = [];
+        if (!likes[item.link]) likes[item.link] = 0;
+        if (!comments[item.link]) comments[item.link] = [];
 
         allNews.push({
           id: item.link,
           title: item.title,
           content: content,
           mediaUrl: mediaUrl,
-          mediaType: isVideo? 'video' : 'image',
+          mediaType: isVideo ? 'video' : 'image',
           link: item.link,
           source: feed.title,
           date: item.pubDate,
@@ -54,6 +81,7 @@ async function loadNews() {
       console.log("Erreur source :", url);
     }
   }
+
   news = allNews;
   console.log("News mises à jour :", news.length);
 }
@@ -65,17 +93,32 @@ app.get("/", (req, res) => {
   res.render("index", { news });
 });
 
+// =======================
+// 👍 LIKE (PERSISTANT)
+// =======================
 app.post("/like", (req, res) => {
   const id = req.body.id;
+
   if (!likes[id]) likes[id] = 0;
   likes[id]++;
+
+  saveData(); // ✅ AJOUT
+
   res.json({ success: true, likes: likes[id] });
 });
 
+// =======================
+// 💬 COMMENTAIRE (PERSISTANT)
+// =======================
 app.post("/comment", (req, res) => {
   const { id, text } = req.body;
+
   if (!comments[id]) comments[id] = [];
+
   comments[id].push({ text, date: new Date() });
+
+  saveData(); // ✅ AJOUT
+
   res.json({ success: true, count: comments[id].length });
 });
 
