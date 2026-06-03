@@ -33,25 +33,21 @@
     <div class="card" data-id="<%= n.id %>">
       
       <!-- 👇 ICI LE BLOC VIDÉO/IMAGE -->
-     <% if(n.mediaType === 'video' && n.mediaUrl) { %>
+    <% if(n.mediaUrl) { %>
 
-  <% if(n.mediaUrl.includes('youtu')) { %>
+  <% if(n.mediaType === 'video') { %>
 
-    <iframe 
-      src="https://www.youtube.com/embed/<%= n.mediaUrl.split('v=')[1] || n.mediaUrl.split('/').pop() %>" 
-      allowfullscreen>
-    </iframe>
+    <% if(n.mediaUrl.includes('youtube') || n.mediaUrl.includes('youtu.be')) { %>
+      <iframe src="https://www.youtube.com/embed/<%= n.mediaUrl.split('v=')[1] || n.mediaUrl.split('/').pop() %>" allowfullscreen></iframe>
 
-  <% } else if(n.mediaUrl.includes('dailymotion')) { %>
-
-    <iframe src="<%= n.mediaUrl.replace('video/', 'embed/video/') %>" allowfullscreen></iframe>
+    <% } else { %>
+      <video controls>
+        <source src="<%= n.mediaUrl %>">
+      </video>
+    <% } %>
 
   <% } else { %>
-
-    <video controls preload="metadata">
-      <source src="<%= n.mediaUrl %>">
-    </video>
-
+    <img src="<%= n.mediaUrl %>">
   <% } %>
 
 <% } %>
