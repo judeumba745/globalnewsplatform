@@ -16,6 +16,7 @@ let likes = {};
 let comments = {};
 
 let language = "fr";
+let lastloadedNews = [];
 
 const DATA_FILE = "./data.json";
 
