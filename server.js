@@ -15,9 +15,6 @@ let news = [];
 let likes = {};
 let comments = {};
 
-let language = "fr";
-let lastLoadedNews = [];
-
 const DATA_FILE = "./data.json";
 
 // =======================
@@ -34,34 +31,7 @@ function loadData() {
     comments = data.comments || {};
   }
 }
-
 loadData();
-
-// =======================
-// 🌍 TRANSLATION
-// =======================
-async function translate(text, targetLang) {
-  if (!text) return "";
-  if (targetLang === "fr") return text;
-
-  try {
-    const res = await fetch("https://libretranslate.com/translate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        q: text,
-        source: "auto",
-        target: targetLang,
-        format: "text"
-      })
-    });
-
-    const data = await res.json();
-    return data.translatedText || text;
-  } catch (err) {
-    return text;
-  }
-}
 
 // =======================
 // SOURCES RSS
@@ -82,48 +52,56 @@ const sources = [
 ];
 
 // =======================
+// EXTRAIRE VIDEO YOUTUBE/DAILYMOTION
+// =======================
+function extractVideo(html) {
+  if (!html) return null;
+
+  let match = html.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/);
+  if (match) return `https://www.youtube.com/embed/${match[1]}`;
+
+  match = html.match(/youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/);
+  if (match) return `https://www.youtube.com/embed/${match[1]}`;
+
+  match = html.match(/dailymotion\.com\/embed\/video\/([a-zA-Z0-9]+)/);
+  if (match) return `https://www.dailymotion.com/embed/video/${match[1]}`;
+
+  return null;
+}
+
+// =======================
 // LOAD NEWS
 // =======================
 async function loadNews() {
   let allNews = [];
-
   for (let url of sources) {
     try {
       const feed = await parser.parseURL(url);
-
       for (let item of feed.items.slice(0, 15)) {
-
         let media = item['media:content'] || [item.enclosure] || [];
         let mediaUrl = media[0]?.url || item.enclosure?.url || "";
         let mediaType = media[0]?.type || item.enclosure?.type || "";
 
-        let isVideo =
-          mediaType.includes('video') ||
-          mediaUrl.includes('.mp4') ||
-          mediaUrl.includes('youtube') ||
-          mediaUrl.includes('dailymotion');
+        // Cherche vidéo dans le contenu HTML
+        let videoUrl = extractVideo(item.content || item.description);
+        if (videoUrl) {
+          mediaUrl = videoUrl;
+          mediaType = "video/mp4";
+        }
 
+        let isVideo = mediaType.includes('video') || mediaUrl.includes('.mp4') || mediaUrl.includes('youtube') || mediaUrl.includes('dailymotion');
         let content = item.content || item.contentSnippet || item.description || "";
 
         // init reactions
         if (!likes[item.link]) likes[item.link] = 0;
         if (!comments[item.link]) comments[item.link] = [];
 
-        // 🌍 TRANSLATION
-        let titleFinal = item.title;
-        let contentFinal = content;
-
-        if (language !== "fr") {
-          titleFinal = await translate(item.title, language);
-          contentFinal = await translate(content, language);
-        }
-
         allNews.push({
           id: item.link,
-          title: titleFinal,
-          content: contentFinal,
+          title: item.title,
+          content: content,
           mediaUrl,
-          mediaType: isVideo ? "video" : "image",
+          mediaType: isVideo? "video" : "image",
           link: item.link,
           source: feed.title,
           date: item.pubDate,
@@ -132,11 +110,11 @@ async function loadNews() {
         });
       }
     } catch (err) {
-      console.log("Erreur source :", url);
+      console.log("Erreur source :", url, err.message);
     }
   }
-
-  news = allNews;
+  news = allNews.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 30);
+  console.log("News chargées:", news.length);
 }
 
 // =======================
@@ -152,58 +130,35 @@ app.get("/", (req, res) => {
   res.render("index", { news });
 });
 
-// 🔥 LANGUAGE CHANGE (FIX PROPRE)
-app.post("/set-language", async (req, res) => {
-  language = req.body.lang || "fr";
-
-  await loadNews();
-
-  res.json({ success: true, lang: language });
-});
-
 // 👍 LIKE
 app.post("/like", (req, res) => {
   const id = req.body.id;
-
   if (!likes[id]) likes[id] = 0;
   likes[id]++;
-
   saveData();
-
   res.json({ success: true, likes: likes[id] });
 });
 
 // 💬 COMMENT
 app.post("/comment", (req, res) => {
   const { id, text } = req.body;
-
   if (!comments[id]) comments[id] = [];
-
   comments[id].push({ text, date: new Date() });
-
   saveData();
-
   res.json({ success: true, count: comments[id].length });
 });
 
 // GET REACTIONS
 app.get("/reactions/:id", (req, res) => {
   const id = req.params.id;
-
   res.json({
     likes: likes[id] || 0,
     comments: comments[id] || []
   });
 });
 
-// GET COMMENTS
-app.get("/comments/:id", (req, res) => {
-  const id = req.params.id;
-  res.json(comments[id] || []);
-});
-
 // =======================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, "0.0.0.0", () => {
-  console.log("🚀 News Platform running");
+  console.log("🚀 News Platform running on port", PORT);
 });
