@@ -22,27 +22,55 @@ const sources = [
 
 async function loadNews() {
   let allNews = [];
+
   for (let url of sources) {
     try {
       const feed = await parser.parseURL(url);
+
       for (let item of feed.items.slice(0, 15)) {
-        let media = item['media:content'] || [item.enclosure] || [];
-        let mediaUrl = media[0]?.url || item.enclosure?.url || "";
-        let mediaType = media[0]?.type || item.enclosure?.type || "";
 
-        let isVideo = mediaType.includes('video') || mediaUrl.includes('.mp4') || mediaUrl.includes('youtube') || mediaUrl.includes('dailymotion');
+        // 🔥 récupération plus robuste des médias
+        let mediaUrl = "";
 
-        let content = item.content || item.contentSnippet || item.description || "";
+        // 1. enclosure (souvent vidéo/image)
+        if (item.enclosure && item.enclosure.url) {
+          mediaUrl = item.enclosure.url;
+        }
 
-        if(!likes[item.link]) likes[item.link] = 0;
-        if(!comments[item.link]) comments[item.link] = [];
+        // 2. media:content (RSS média)
+        if (!mediaUrl && item["media:content"]?.url) {
+          mediaUrl = item["media:content"].url;
+        }
+
+        // 3. media group (parfois utilisé)
+        if (!mediaUrl && item["media:group"]?.["media:content"]?.[0]?.url) {
+          mediaUrl = item["media:group"]["media:content"][0].url;
+        }
+
+        // 4. fallback dans le contenu HTML
+        if (!mediaUrl && item.content) {
+          const match = item.content.match(/src="([^"]+)"/);
+          if (match) mediaUrl = match[1];
+        }
+
+        let isVideo =
+          mediaUrl.includes(".mp4") ||
+          mediaUrl.includes("youtube") ||
+          mediaUrl.includes("youtu.be") ||
+          mediaUrl.includes("dailymotion") ||
+          mediaUrl.includes("video");
+
+        let content = item.contentSnippet || item.content || item.description || "";
+
+        if (!likes[item.link]) likes[item.link] = 0;
+        if (!comments[item.link]) comments[item.link] = [];
 
         allNews.push({
           id: item.link,
           title: item.title,
-          content: content,
-          mediaUrl: mediaUrl,
-          mediaType: isVideo? 'video' : 'image',
+          content,
+          mediaUrl,
+          mediaType: isVideo ? "video" : "image",
           link: item.link,
           source: feed.title,
           date: item.pubDate,
@@ -54,10 +82,10 @@ async function loadNews() {
       console.log("Erreur source :", url);
     }
   }
+
   news = allNews;
   console.log("News mises à jour :", news.length);
 }
-
 loadNews();
 setInterval(loadNews, 10 * 60 * 1000);
 
