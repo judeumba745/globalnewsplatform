@@ -34,7 +34,7 @@ function loadData() {
 loadData();
 
 // =======================
-// SOURCES RSS
+// RSS SOURCES
 // =======================
 const sources = [
   "https://www.france24.com/fr/rss",
@@ -52,7 +52,7 @@ const sources = [
 ];
 
 // =======================
-// EXTRAIRE VIDEO YOUTUBE/DAILYMOTION
+// VIDEO EXTRACT
 // =======================
 function extractVideo(html) {
   if (!html) return null;
@@ -61,6 +61,9 @@ function extractVideo(html) {
   if (match) return `https://www.youtube.com/embed/${match[1]}`;
 
   match = html.match(/youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/);
+  if (match) return `https://www.youtube.com/embed/${match[1]}`;
+
+  match = html.match(/youtu\.be\/([a-zA-Z0-9_-]+)/);
   if (match) return `https://www.youtube.com/embed/${match[1]}`;
 
   match = html.match(/dailymotion\.com\/embed\/video\/([a-zA-Z0-9]+)/);
@@ -74,34 +77,37 @@ function extractVideo(html) {
 // =======================
 async function loadNews() {
   let allNews = [];
+
   for (let url of sources) {
     try {
       const feed = await parser.parseURL(url);
-      for (let item of feed.items.slice(0, 15)) {
-        let media = item['media:content'] || [item.enclosure] || [];
-        let mediaUrl = media[0]?.url || item.enclosure?.url || "";
-        let mediaType = media[0]?.type || item.enclosure?.type || "";
 
-        // Cherche vidéo dans le contenu HTML
+      for (let item of feed.items.slice(0, 10)) {
+        let mediaUrl = item.enclosure?.url || "";
+        let mediaType = item.enclosure?.type || "";
+
         let videoUrl = extractVideo(item.content || item.description);
         if (videoUrl) {
           mediaUrl = videoUrl;
           mediaType = "video/mp4";
         }
 
-        let isVideo = mediaType.includes('video') || mediaUrl.includes('.mp4') || mediaUrl.includes('youtube') || mediaUrl.includes('dailymotion');
+        let isVideo =
+          mediaType.includes("video") ||
+          mediaUrl.includes("youtube") ||
+          mediaUrl.includes("dailymotion");
+
         let content = item.content || item.contentSnippet || item.description || "";
 
-        // init reactions
         if (!likes[item.link]) likes[item.link] = 0;
         if (!comments[item.link]) comments[item.link] = [];
 
         allNews.push({
           id: item.link,
           title: item.title,
-          content: content,
+          content,
           mediaUrl,
-          mediaType: isVideo? "video" : "image",
+          mediaType: isVideo ? "video" : "image",
           link: item.link,
           source: feed.title,
           date: item.pubDate,
@@ -110,16 +116,17 @@ async function loadNews() {
         });
       }
     } catch (err) {
-      console.log("Erreur source :", url, err.message);
+      console.log("Erreur RSS:", url);
     }
   }
-  news = allNews.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 30);
+
+  news = allNews
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 30);
+
   console.log("News chargées:", news.length);
 }
 
-// =======================
-// AUTO REFRESH
-// =======================
 loadNews();
 setInterval(loadNews, 10 * 60 * 1000);
 
@@ -130,25 +137,21 @@ app.get("/", (req, res) => {
   res.render("index", { news });
 });
 
-// 👍 LIKE
 app.post("/like", (req, res) => {
   const id = req.body.id;
-  if (!likes[id]) likes[id] = 0;
-  likes[id]++;
+  likes[id] = (likes[id] || 0) + 1;
   saveData();
-  res.json({ success: true, likes: likes[id] });
+  res.json({ likes: likes[id] });
 });
 
-// 💬 COMMENT
 app.post("/comment", (req, res) => {
   const { id, text } = req.body;
   if (!comments[id]) comments[id] = [];
   comments[id].push({ text, date: new Date() });
   saveData();
-  res.json({ success: true, count: comments[id].length });
+  res.json({ ok: true });
 });
 
-// GET REACTIONS
 app.get("/reactions/:id", (req, res) => {
   const id = req.params.id;
   res.json({
@@ -157,8 +160,6 @@ app.get("/reactions/:id", (req, res) => {
   });
 });
 
-// =======================
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, "0.0.0.0", () => {
-  console.log("🚀 News Platform running on port", PORT);
+app.listen(3000, "0.0.0.0", () => {
+  console.log("🚀 Server running");
 });
