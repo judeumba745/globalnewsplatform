@@ -26,10 +26,14 @@ async function loadNews() {
     try {
       const feed = await parser.parseURL(url);
       for (let item of feed.items.slice(0, 15)) {
-        let mainImage = item.enclosure?.url || item["media:content"]?.url || "";
+        let media = item['media:content'] || [item.enclosure] || [];
+        let mediaUrl = media[0]?.url || item.enclosure?.url || "";
+        let mediaType = media[0]?.type || item.enclosure?.type || "";
+
+        let isVideo = mediaType.includes('video') || mediaUrl.includes('.mp4') || mediaUrl.includes('youtube') || mediaUrl.includes('dailymotion');
+
         let content = item.content || item.contentSnippet || item.description || "";
 
-        // Si l'article est nouveau, init à 0
         if(!likes[item.link]) likes[item.link] = 0;
         if(!comments[item.link]) comments[item.link] = [];
 
@@ -37,7 +41,8 @@ async function loadNews() {
           id: item.link,
           title: item.title,
           content: content,
-          mainImage: mainImage,
+          mediaUrl: mediaUrl,
+          mediaType: isVideo? 'video' : 'image',
           link: item.link,
           source: feed.title,
           date: item.pubDate,
