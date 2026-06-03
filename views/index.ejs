@@ -243,6 +243,7 @@ async function like(id, btn) {
     headers: {'Content-Type':'application/json'}, 
     body: JSON.stringify({id}) 
   });
+
   const data = await res.json();
   const card = document.querySelector(`[data-id="${id}"]`);
   card.querySelector('.like-count').textContent = data.likes;
@@ -260,11 +261,13 @@ async function comment(id) {
   const input = document.getElementById('input-'+id);
   const text = input.value.trim();
   if (!text) return;
+
   await fetch('/comment', { 
     method: 'POST', 
     headers: {'Content-Type':'application/json'}, 
     body: JSON.stringify({id, text}) 
   });
+
   input.value = '';
   loadComments(id);
 }
@@ -272,15 +275,19 @@ async function comment(id) {
 async function loadComments(id) {
   const res = await fetch('/reactions/' + id);
   const data = await res.json();
+
   const card = document.querySelector(`[data-id="${id}"]`);
   const list = card.querySelector('.comments-list');
+
   list.innerHTML = '';
+
   data.comments.forEach(c => {
     const div = document.createElement('div');
     div.className = 'comment';
     div.textContent = c.text;
     list.appendChild(div);
   });
+
   card.querySelector('.comment-count').textContent = data.comments.length;
   card.querySelector('.like-count').textContent = data.likes;
 }
@@ -294,15 +301,26 @@ function share(link) {
   }
 }
 
-function changeLanguage() {
+async function changeLanguage() {
   const lang = document.getElementById("languageSelect").value;
+
   localStorage.setItem("language", lang);
+
+  // 🔥 ENVOI AU SERVEUR (IMPORTANT pour traduction réelle)
+  await fetch("/set-language", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ lang })
+  });
+
+  // 🔥 recharge pour afficher les titres traduits
+  location.reload();
 }
 
 window.onload = () => {
   const savedLang = localStorage.getItem("language");
 
-  if(savedLang){
+  if (savedLang) {
     document.getElementById("languageSelect").value = savedLang;
   }
 };
