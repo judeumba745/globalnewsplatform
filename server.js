@@ -115,6 +115,14 @@ app.post("/comment", (req, res) => {
   res.json({ success: true, count: comments[id].length });
 });
 
+app.get("/reactions/:id", (req, res) => {
+  const id = req.params.id;
+
+  res.json({
+    likes: likes[id] || 0,
+    comments: comments[id] || []
+  });
+});
 
 // 🔥 AJOUT IMPORTANT : récupérer tous les commentaires
 app.get("/comments/:id", (req, res) => {
