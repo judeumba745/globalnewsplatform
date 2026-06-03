@@ -15,6 +15,8 @@ let news = [];
 let likes = {};
 let comments = {};
 
+let language = "fr";
+
 const DATA_FILE = "./data.json";
 
 // =======================
@@ -34,36 +36,54 @@ function loadData() {
 
 loadData();
 
+// =======================
+// 🌍 TRANSLATION
+// =======================
+async function translate(text, targetLang) {
+  if (!text) return "";
+
+  if (targetLang === "fr") return text;
+
+  try {
+    const res = await fetch("https://libretranslate.com/translate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        q: text,
+        source: "auto",
+        target: targetLang,
+        format: "text"
+      })
+    });
+
+    const data = await res.json();
+    return data.translatedText || text;
+  } catch (err) {
+    return text;
+  }
+}
+
+// =======================
+// SOURCES RSS
+// =======================
 const sources = [
-  // Monde
   "https://www.france24.com/fr/rss",
   "https://www.rfi.fr/fr/rss",
   "https://feeds.bbci.co.uk/news/rss.xml",
-
-  // Sport
   "https://feeds.bbci.co.uk/sport/rss.xml",
   "https://www.skysports.com/rss/12040",
   "https://www.espn.com/espn/rss/news",
-
-  // Football
   "https://feeds.bbci.co.uk/sport/football/rss.xml",
-
-  // Basket
   "https://feeds.bbci.co.uk/sport/basketball/rss.xml",
-
-  // Boxe
   "https://feeds.bbci.co.uk/sport/boxing/rss.xml",
-
-  // Musique
   "https://www.billboard.com/feed/",
-
-  // Tech
   "https://www.theverge.com/rss/index.xml",
-
-  // Afrique
   "https://www.jeuneafrique.com/feed/"
 ];
 
+// =======================
+// LOAD NEWS
+// =======================
 async function loadNews() {
   let allNews = [];
 
@@ -72,6 +92,7 @@ async function loadNews() {
       const feed = await parser.parseURL(url);
 
       for (let item of feed.items.slice(0, 15)) {
+
         let media = item['media:content'] || [item.enclosure] || [];
         let mediaUrl = media[0]?.url || item.enclosure?.url || "";
         let mediaType = media[0]?.type || item.enclosure?.type || "";
@@ -84,15 +105,25 @@ async function loadNews() {
 
         let content = item.content || item.contentSnippet || item.description || "";
 
+        // 👍 init reactions
         if (!likes[item.link]) likes[item.link] = 0;
         if (!comments[item.link]) comments[item.link] = [];
 
+        // 🌍 TRANSLATION (TITLE + CONTENT ONLY)
+        let titleFinal = item.title;
+        let contentFinal = content;
+
+        if (language !== "fr") {
+          titleFinal = await translate(item.title, language);
+          contentFinal = await translate(content, language);
+        }
+
         allNews.push({
           id: item.link,
-          title: item.title,
-          content,
+          title: titleFinal,
+          content: contentFinal,
           mediaUrl,
-          mediaType: isVideo ? 'video' : 'image',
+          mediaType: isVideo ? "video" : "image",
           link: item.link,
           source: feed.title,
           date: item.pubDate,
@@ -108,11 +139,23 @@ async function loadNews() {
   news = allNews;
 }
 
+// =======================
+// AUTO REFRESH
+// =======================
 loadNews();
 setInterval(loadNews, 10 * 60 * 1000);
 
+// =======================
+// ROUTES
+// =======================
 app.get("/", (req, res) => {
   res.render("index", { news });
+});
+
+app.post("/set-language", (req, res) => {
+  language = req.body.lang || "fr";
+  loadNews();
+  res.json({ success: true });
 });
 
 // 👍 LIKE
@@ -127,7 +170,7 @@ app.post("/like", (req, res) => {
   res.json({ success: true, likes: likes[id] });
 });
 
-// 💬 COMMENTAIRE
+// 💬 COMMENT
 app.post("/comment", (req, res) => {
   const { id, text } = req.body;
 
@@ -149,12 +192,12 @@ app.get("/reactions/:id", (req, res) => {
   });
 });
 
-// 🔥 AJOUT IMPORTANT : récupérer tous les commentaires
 app.get("/comments/:id", (req, res) => {
   const id = req.params.id;
   res.json(comments[id] || []);
 });
 
+// =======================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log("🚀 News Platform running");
