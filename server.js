@@ -11,6 +11,7 @@ app.set("view engine", "ejs");
 app.use(express.static("public"));
 
 let news = [];
+// ⚠️ Render Free = mémoire effacée à chaque redémarrage. Compteurs repartent à 0
 let likes = {};
 let comments = {};
 
@@ -19,16 +20,18 @@ const sources = [
   "https://www.rfi.fr/fr/rss"
 ];
 
-// 📰 LOAD NEWS via RSS direct - pas de scraping
 async function loadNews() {
   let allNews = [];
   for (let url of sources) {
     try {
       const feed = await parser.parseURL(url);
       for (let item of feed.items.slice(0, 15)) {
-        // Image + contenu complet sont déjà dans le RSS
         let mainImage = item.enclosure?.url || item["media:content"]?.url || "";
         let content = item.content || item.contentSnippet || item.description || "";
+
+        // Si l'article est nouveau, init à 0
+        if(!likes[item.link]) likes[item.link] = 0;
+        if(!comments[item.link]) comments[item.link] = [];
 
         allNews.push({
           id: item.link,
@@ -37,7 +40,9 @@ async function loadNews() {
           mainImage: mainImage,
           link: item.link,
           source: feed.title,
-          date: item.pubDate
+          date: item.pubDate,
+          likes: likes[item.link],
+          comments: comments[item.link].length
         });
       }
     } catch (err) {
@@ -48,26 +53,11 @@ async function loadNews() {
   console.log("News mises à jour :", news.length);
 }
 
-function getTrendingNews() {
-  return news.map(n => ({...n, likesCount: likes[n.id] || 0}))
-   .sort((a, b) => b.likesCount - a.likesCount);
-}
-
 loadNews();
 setInterval(loadNews, 10 * 60 * 1000);
 
 app.get("/", (req, res) => {
-  const trending = getTrendingNews();
-  res.render("index", { news: trending, likes, comments });
-});
-
-app.get("/trending", (req, res) => {
-  const trending = getTrendingNews();
-  res.render("index", { news: trending, likes, comments });
-});
-
-app.get("/api/news", (req, res) => {
-  res.json(news);
+  res.render("index", { news });
 });
 
 app.post("/like", (req, res) => {
@@ -81,10 +71,9 @@ app.post("/comment", (req, res) => {
   const { id, text } = req.body;
   if (!comments[id]) comments[id] = [];
   comments[id].push({ text, date: new Date() });
-  res.json({ success: true });
+  res.json({ success: true, count: comments[id].length });
 });
 
-// ⚠️ IMPORTANT POUR RENDER
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 News Platform running on port ${PORT}`);
