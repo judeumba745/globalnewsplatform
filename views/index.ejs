@@ -31,11 +31,11 @@
     .actions button:hover {background: #f2f3f5;}
     .actions button.active {color: #1877f2;}
     .comment-box {background: #f7f7f7; padding: 10px; border-top: 1px solid #ddd; display: none;}
-    .comment-box input {width: 100%; padding: 8px; border-radius: 18px; border: 1px solid #ccc; margin-bottom: 5px; font-size: 14px;}
-    .comment-box textarea {width: 100%; height: 50px; padding: 8px; border-radius: 18px; border: 1px solid #ccc; resize: none; font-size: 14px;}
+    .comment-box input {width: 100%; padding: 8px; margin-bottom: 5px; border-radius: 18px; border: 1px solid #ccc; font-size: 14px; box-sizing: border-box;}
+    .comment-box textarea {width: 100%; height: 50px; padding: 8px; border-radius: 18px; border: 1px solid #ccc; resize: none; font-size: 14px; box-sizing: border-box;}
     .comment-box button {margin-top: 5px; background: #1877f2; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold;}
     .comment {background: #f2f3f5; padding: 8px 12px; border-radius: 18px; margin: 5px 0; font-size: 14px;}
-    .comment b {display: block; font-size: 13px; margin-bottom: 3px;}
+    .comment b {display: block; font-size: 13px; color: #1877f2; margin-bottom: 3px;}
     #google_translate_element {position: fixed; bottom: 10px; right: 10px; opacity: 0.01;}
     .goog-te-banner-frame, .skiptranslate {display: none!important;}
   </style>
@@ -67,13 +67,13 @@
         <div class="news-date">🕒 <%= new Date(n.date).toLocaleString("fr-FR") %></div>
         <div class="content"><%- n.content %></div>
         
-        <div class="react-info">
-          👍 <span id="like-<%= n.id %>"><%= likes[n.id] || 0 %></span> personne<%= (likes[n.id] || 0) > 1 ? 's' : '' %> · 
-          💬 <span id="count-<%= n.id %>"><%= (comments[n.id] || []).length %></span> commentaire<%= (comments[n.id] || []).length > 1 ? 's' : '' %>
+        <div class="react-info"> 
+          👍 <span id="like-count-<%= n.id %>"><%= n.likes %></span> personne<%= n.likes > 1 ? 's' : '' %> · 
+          💬 <span id="count-<%= n.id %>"><%= n.comments.length %></span> commentaire<%= n.comments.length > 1 ? 's' : '' %> 
         </div>
         
         <div class="actions">
-          <button id="btn-like-<%= n.id %>" onclick="like('<%= n.id %>', this)">👍 J’aime</button>
+          <button id="like-btn-<%= n.id %>" onclick="like('<%= n.id %>', this)">👍 J’aime</button>
           <button onclick="toggleComment('<%= n.id %>')">💬 Commenter</button>
           <button onclick="share('<%= n.link %>')">↗️ Partager</button>
         </div>
@@ -113,68 +113,78 @@
     };
   </script>
   <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  
   <script>
-    async function like(id, btn) {
-      const res = await fetch("/like", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({id})
-      });
-      const data = await res.json();
-      
-      // Met à jour le nombre en live
-      document.getElementById("like-" + id).innerText = data.likes;
-      document.getElementById("like-" + id).nextSibling.textContent = data.likes > 1 ? " personnes · " : " personne · ";
-      btn.classList.add("active");
-    }
+  async function like(id, btn) {
+    const res = await fetch("/like", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({id})
+    });
+    const data = await res.json();
+    
+    // Update compteur like en live
+    const likeSpan = document.getElementById("like-count-" + id);
+    likeSpan.innerText = data.likes;
+    likeSpan.nextSibling.textContent = data.likes > 1 ? " personnes · " : " personne · ";
+    
+    btn.classList.add("active");
+  }
 
-    function toggleComment(id) {
-      const box = document.getElementById("comment-" + id);
-      box.style.display = box.style.display === "block" ? "none" : "block";
-      if(box.style.display === "block") loadComments(id);
-    }
+  function toggleComment(id) {
+    const box = document.getElementById("comment-" + id);
+    box.style.display = box.style.display === "block" ? "none" : "block";
+  }
 
-    async function sendComment(id) {
-      const name = document.getElementById("name-" + id).value;
-      const text = document.getElementById("text-" + id).value;
-      if (!name || !text) {alert("Mets ton nom et ton commentaire"); return;}
-      
-      await fetch("/comment", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({id, text}) // ton serveur actuel prend juste text
-      });
-      
-      document.getElementById("name-" + id).value = "";
-      document.getElementById("text-" + id).value = "";
-      loadComments(id);
-    }
+  async function sendComment(id) {
+    const name = document.getElementById("name-" + id).value.trim();
+    const text = document.getElementById("text-" + id).value.trim();
+    if(!name || !text) return alert("Mets ton nom et ton commentaire");
 
-    async function loadComments(id) {
-      const res = await fetch("/reactions/" + id);
-      const data = await res.json();
-      const list = document.getElementById("list-" + id);
-      const count = document.getElementById("count-" + id);
-      
-      list.innerHTML = data.comments.map(c => 
-        `<div class="comment">${c.text}</div>` // ton serveur n'a pas "name" encore
-      ).join("");
-      
-      count.innerText = data.comments.length;
-      count.nextSibling.textContent = data.comments.length > 1 ? " commentaires" : " commentaire";
-    }
+    // Ton serveur actuel prend juste "text", donc on envoie "Nom: texte"
+    await fetch("/comment", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({id, text: name + ": " + text})
+    });
 
-    function share(link) {
-      if (navigator.share) {navigator.share({url: link});} 
-      else {navigator.clipboard.writeText(link); alert("Lien copié!");}
-    }
+    document.getElementById("text-" + id).value = "";
+    document.getElementById("name-" + id).value = "";
+    loadComments(id);
+  }
 
-    function toggleMenu() {
-      const menu = document.getElementById("menu");
-      menu.style.display = menu.style.display === "block" ? "none" : "block";
-    }
-    function closeMenu() {document.getElementById("menu").style.display = "none";}
+  async function loadComments(id) {
+    const res = await fetch("/reactions/" + id);
+    const data = await res.json();
+    
+    // Update compteur commentaires
+    const countSpan = document.getElementById("count-" + id);
+    countSpan.innerText = data.comments.length;
+    countSpan.nextSibling.textContent = data.comments.length > 1 ? " commentaires" : " commentaire";
+    
+    // Affiche commentaires avec nom si présent
+    const list = document.getElementById("list-" + id);
+    list.innerHTML = data.comments.map(c => {
+      const parts = c.text.split(": ");
+      if(parts.length > 1) {
+        return `<div class="comment"><b>${parts[0]}</b>${parts.slice(1).join(": ")}</div>`;
+      }
+      return `<div class="comment">${c.text}</div>`;
+    }).join("");
+  }
+
+  function share(link) {
+    if (navigator.share) {navigator.share({url: link});} 
+    else {navigator.clipboard.writeText(link); alert("Lien copié!");}
+  }
+
+  function toggleMenu() {
+    const menu = document.getElementById("menu");
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+  }
+  function closeMenu() {document.getElementById("menu").style.display = "none";}
   </script>
+
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
