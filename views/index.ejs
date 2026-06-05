@@ -38,6 +38,26 @@
     .comment b {display: block; font-size: 13px; color: #1877f2; margin-bottom: 3px;}
     #google_translate_element {position: fixed; bottom: 10px; right: 10px; opacity: 0.01;}
     .goog-te-banner-frame, .skiptranslate {display: none!important;}
+
+.comment-box {
+  transition: all 0.3s ease;
+}
+
+.comment {
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
   </style>
 </head>
 <body>
@@ -103,14 +123,11 @@
       }
       apply();
     }
-    window.onload = () => {
-      const lang = localStorage.getItem("lang") || "fr";
-      document.getElementById("languageSelect").value = lang;
-      setTimeout(changeLanguage, 1000);
-      <% news.forEach(n => { %>
-        loadComments('<%= n.id %>');
-      <% }) %>
-    };
+   window.onload = () => {
+  const lang = localStorage.getItem("lang") || "fr";
+  document.getElementById("languageSelect").value = lang;
+  setTimeout(changeLanguage, 1000);
+};
   </script>
   <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
   
@@ -131,10 +148,16 @@
     btn.classList.add("active");
   }
 
-  function toggleComment(id) {
-    const box = document.getElementById("comment-" + id);
-    box.style.display = box.style.display === "block" ? "none" : "block";
+ function toggleComment(id) {
+  const box = document.getElementById("comment-" + id);
+
+  if (box.style.display === "block") {
+    box.style.display = "none";
+  } else {
+    box.style.display = "block";
+    loadComments(id);
   }
+}
 
   async function sendComment(id) {
     const name = document.getElementById("name-" + id).value.trim();
