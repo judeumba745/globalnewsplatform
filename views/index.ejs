@@ -194,6 +194,31 @@ body {
 .skiptranslate {
   display: none !important;
 }
+
+.comment-box {
+  background: #f7f7f7;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+}
+
+.comment-box textarea {
+  width: 100%;
+  height: 60px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  resize: none;
+}
+
+.comment-box button {
+  margin-top: 5px;
+  background: #1877f2;
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
 </style>
 </head>
 
@@ -252,13 +277,24 @@ body {
 
     <div class="actions">
       <button onclick="like('<%= n.id %>', this)">👍 <%= n.likes %></button>
-      <button onclick="toggleComment('<%= n.id %>')">💬</button>
+     <button onclick="toggleComment('<%= n.id %>')">💬 Commenter</button>
       <button onclick="share('<%= n.link %>')">↗️</button>
     </div>
 
   </div>
 <% }) %>
 
+</div>
+
+<div class="comment-box" id="comment-<%= n.id %>" style="display:none;">
+  
+  <textarea placeholder="Écrire un commentaire..." id="text-<%= n.id %>"></textarea>
+  
+  <button onclick="sendComment('<%= n.id %>')">
+    Envoyer
+  </button>
+
+  <div id="list-<%= n.id %>"></div>
 </div>
 
 <!-- ===== GOOGLE TRANSLATE ===== -->
@@ -310,19 +346,43 @@ async function like(id, btn){
 }
 
 function toggleComment(id) {
-  const text = prompt("Écris ton commentaire :");
+  const box = document.getElementById("comment-" + id);
+
+  if (box.style.display === "none") {
+    box.style.display = "block";
+    loadComments(id);
+  } else {
+    box.style.display = "none";
+  }
+}
+
+async function sendComment(id) {
+  const text = document.getElementById("text-" + id).value;
 
   if (!text) return;
 
-  fetch("/comment", {
+  await fetch("/comment", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({ id, text })
-  })
-  .then(res => res.json())
-  .then(() => {
-    alert("Commentaire envoyé !");
   });
+
+  document.getElementById("text-" + id).value = "";
+
+  loadComments(id);
+}
+
+async function loadComments(id) {
+  const res = await fetch("/reactions/" + id);
+  const data = await res.json();
+
+  const list = document.getElementById("list-" + id);
+
+  list.innerHTML = data.comments.map(c =>
+    `<div style="padding:5px;border-bottom:1px solid #eee;">
+      💬 ${c.text}
+    </div>`
+  ).join("");
 }
 
 function share(link){
