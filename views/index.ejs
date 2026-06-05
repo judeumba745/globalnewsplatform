@@ -309,6 +309,22 @@ async function like(id, btn){
   btn.innerText = "👍 " + data.likes;
 }
 
+function toggleComment(id) {
+  const text = prompt("Écris ton commentaire :");
+
+  if (!text) return;
+
+  fetch("/comment", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ id, text })
+  })
+  .then(res => res.json())
+  .then(() => {
+    alert("Commentaire envoyé !");
+  });
+}
+
 function share(link){
   if(navigator.share){
     navigator.share({url:link});
