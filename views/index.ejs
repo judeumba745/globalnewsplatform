@@ -141,6 +141,15 @@ img, video, iframe {
   display: block;
 }
 
+img {
+  animation: zoom 6s infinite alternate;
+}
+
+@keyframes zoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.05); }
+}
+
 /* ACTIONS */
 .actions {
   display: flex;
@@ -216,7 +225,11 @@ body{
   <div class="card" data-id="<%= n.id %>">
 
     <% if(n.mediaType === 'video') { %>
-      <iframe src="<%= n.mediaUrl %>"></iframe>
+      <iframe 
+  src="<%= n.mediaUrl %>?autoplay=1&mute=1"
+  allow="autoplay; encrypted-media"
+  allowfullscreen>
+</iframe>
     <% } else if(n.mediaUrl) { %>
       <img src="<%= n.mediaUrl %>">
     <% } %>
