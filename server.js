@@ -71,17 +71,17 @@ const sources = [
 function extractVideo(html) {
   if (!html) return null;
 
-  let match = html.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/);
-  if (match) return `https://www.youtube.com/embed/${match[1]}`;
+ let match = html.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/);
+if (match) return `https://www.youtube.com/embed/${match[1]}?autoplay=1&mute=1`;
 
-  match = html.match(/youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/);
-  if (match) return `https://www.youtube.com/embed/${match[1]}`;
+match = html.match(/youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/);
+if (match) return `https://www.youtube.com/embed/${match[1]}?autoplay=1&mute=1`;
 
-  match = html.match(/youtu\.be\/([a-zA-Z0-9_-]+)/);
-  if (match) return `https://www.youtube.com/embed/${match[1]}`;
+match = html.match(/youtu\.be\/([a-zA-Z0-9_-]+)/);
+if (match) return `https://www.youtube.com/embed/${match[1]}?autoplay=1&mute=1`;
 
-  match = html.match(/dailymotion\.com\/embed\/video\/([a-zA-Z0-9]+)/);
-  if (match) return `https://www.dailymotion.com/embed/video/${match[1]}`;
+match = html.match(/dailymotion\.com\/embed\/video\/([a-zA-Z0-9]+)/);
+if (match) return `https://www.dailymotion.com/embed/video/${match[1]}`;
 
   return null;
 }
