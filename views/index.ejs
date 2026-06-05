@@ -1,423 +1,332 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Global News</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Global News</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0d0d0d">
+  
+  <!-- iOS support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="apple-touch-icon" href="/icon.png">
 
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0d0d0d">
+  <style>
+    body {
+      font-family: Arial;
+      margin: 0;
+      background: #f2f2f2;
+      padding-top: 130px;
+      top: 0 !important;
+      pointer-events: auto !important;
+    }
 
-<!-- iOS support -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<link rel="apple-touch-icon" href="/icon.png">
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 70px;
+      background: linear-gradient(90deg, #0066ff, #0099ff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      box-shadow: 0 2px 10px rgba(0,0,0,.25);
+    }
 
-<style>
-body {
-  font-family: Arial;
-  margin: 0;
-  background: #f2f2f2;
-  padding-top: 130px;
-}
-header{
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:70px;
-  background:linear-gradient(90deg,#0066ff,#0099ff);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  z-index:9999;
-  box-shadow:0 2px 10px rgba(0,0,0,.25);
-}
+    .header-title {
+      color: white;
+      font-size: 30px;
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: 2px;
+    }
 
-.header-title{
-  color:white;
-  font-size:30px;
-  font-weight:900;
-  font-style:italic;
-  letter-spacing:2px;
-}
+    .menu-btn {
+      position: absolute;
+      right: 15px;
+      color: red;
+      font-size: 34px;
+      cursor: pointer;
+    }
 
-.menu-btn{
-  position:absolute;
-  right:15px;
-  color:red;
-  font-size:34px;
-  cursor:pointer;
-}
+    .menu {
+      display: none;
+      position: absolute;
+      top: 70px;
+      right: 10px;
+      width: 220px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0,0,0,.2);
+      padding: 15px;
+    }
 
-.menu{
-  display:none;
-  position:absolute;
-  top:70px;
-  right:10px;
-  width:220px;
-  background:white;
-  border-radius:12px;
-  box-shadow:0 5px 20px rgba(0,0,0,.2);
-  padding:15px;
-}
+    .menu select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
 
-.menu select{
-  width:100%;
-  padding:10px;
-  margin-bottom:10px;
-}
+    .menu a {
+      text-decoration: none;
+      color: #0066ff;
+      font-weight: bold;
+    }
 
-.menu a{
-  text-decoration:none;
-  color:#0066ff;
-  font-weight:bold;
-}
+    .container {
+      padding: 10px;
+      max-width: 700px;
+      margin: auto;
+    }
 
-/* BARRE LANGUE PRO */
-.lang-bar {
-  position: fixed;
-  top: 70px;
-  left: 0;
-  width: 100%;
-  background: #111;
-  padding: 10px;
-  display: flex;
-  justify-content: center;
-  z-index: 9998;
-  border-bottom: 1px solid #222;
-}
+    .card {
+      background: white;
+      margin-bottom: 12px;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
 
-.lang-bar select {
-  padding: 7px 12px;
-  border-radius: 10px;
-  border: none;
-  font-weight: bold;
-  background: white;
-}
+    .title {
+      background: #0b6cff;
+      color: white;
+      padding: 12px;
+      font-size: 20px;
+      font-weight: bold;
+    }
 
-/* CONTAINER CLEAN */
-.container {
-  padding: 10px;
-  max-width: 700px;
-  margin: auto;
-}
+    .news-date {
+      padding: 10px;
+      color: #666;
+      font-size: 13px;
+    }
 
-/* CARD PRO STYLE */
-.card {
-  background: white;
-  margin-bottom: 12px;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
+    .content {
+      padding: 12px;
+      font-size: 15px;
+      line-height: 1.6;
+      color: #333;
+    }
 
-/* TITRE NEWS */
-.title{
-  background:#0b6cff;
-  color:white;
-  padding:12px;
-  font-size:20px;
-  font-weight:bold;
-}
+    img, video, iframe {
+      width: 100%;
+      display: block;
+    }
 
-.news-date{
-  padding:10px;
-  color:#666;
-  font-size:13px;
-}
+    img {
+      animation: zoom 6s infinite alternate;
+    }
 
-/* CONTENU */
-.content {
-  padding: 12px;
-  font-size: 15px;
-  line-height: 1.6;
-  color: #333;
-}
+    @keyframes zoom {
+      from { transform: scale(1); }
+      to { transform: scale(1.05); }
+    }
 
-/* MEDIA */
-img, video, iframe {
-  width: 100%;
-  display: block;
-}
+    .actions {
+      display: flex;
+      justify-content: space-around;
+      padding: 10px;
+      border-top: 1px solid #eee;
+    }
 
-img {
-  animation: zoom 6s infinite alternate;
-}
+    .actions button {
+      background: none;
+      border: none;
+      font-size: 14px;
+      font-weight: bold;
+      color: #555;
+      cursor: pointer;
+    }
 
-@keyframes zoom {
-  from { transform: scale(1); }
-  to { transform: scale(1.05); }
-}
+    .comment-box {
+      background: #f7f7f7;
+      padding: 10px;
+      border-top: 1px solid #ddd;
+    }
 
-/* ACTIONS */
-.actions {
-  display: flex;
-  justify-content: space-around;
-  padding: 10px;
-  border-top: 1px solid #eee;
-}
+    .comment-box textarea {
+      width: 100%;
+      height: 60px;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      resize: none;
+    }
 
-.actions button {
-  background: none;
-  border: none;
-  font-size: 14px;
-  font-weight: bold;
-  color: #555;
-}
+    .comment-box button {
+      margin-top: 5px;
+      background: #1877f2;
+      color: white;
+      border: none;
+      padding: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
 
-/* TRANSLATE CACHE CLEAN */
-#google_translate_element {
-  position: fixed;
-  bottom: 10px;
-  right: 10px;
-  opacity: 0.01;
-}
-
-.goog-te-banner-frame{
-  display:none !important;
-}
-
-.skiptranslate{
-  display:none !important;
-}
-
-body{
-  top:0 !important;
-}
-
-body {
-  pointer-events: auto !important;
-}
-
-.goog-te-banner-frame,
-.skiptranslate {
-  display: none !important;
-}
-
-.comment-box {
-  background: #f7f7f7;
-  padding: 10px;
-  border-top: 1px solid #ddd;
-}
-
-.comment-box textarea {
-  width: 100%;
-  height: 60px;
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  resize: none;
-}
-
-.comment-box button {
-  margin-top: 5px;
-  background: #1877f2;
-  color: white;
-  border: none;
-  padding: 8px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-</style>
+    /* Google Translate caché propre */
+    #google_translate_element {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      opacity: 0.01;
+    }
+    .goog-te-banner-frame, .skiptranslate {
+      display: none !important;
+    }
+  </style>
 </head>
-
 <body>
 
-<!-- ===== HEADER PRO ===== -->
-<header>
-
-  <div class="header-title notranslate">
-    NEWS LIVE
-  </div>
-
-  <div class="menu-btn" onclick="toggleMenu()">
-    ☰
-  </div>
-
-  <div id="menu" class="menu">
-
-    <select id="languageSelect" onchange="changeLanguage();closeMenu();">
-      <option value="fr">🇫🇷 Français</option>
-      <option value="en">🇬🇧 English</option>
-      <option value="es">🇪🇸 Español</option>
-      <option value="pt">🇵🇹 Português</option>
-    </select>
-
-    <a href="mailto:judeumba745@gmail.com?subject=Publicité NEWS LIVE">
-      📢 Publicité
-    </a>
-
-  </div>
-
-</header>
-
-<!-- ===== CONTENU ===== -->
-<div class="container">
-
-<% news.forEach(n => { %>
-  <div class="card" data-id="<%= n.id %>">
-
-    <% if(n.mediaType === 'video') { %>
-     <iframe 
-  src="<%= n.mediaUrl %>?autoplay=1&mute=1"
-  allow="autoplay; encrypted-media"
-  allowfullscreen>
-</iframe>
-    <% } else if(n.mediaUrl) { %>
-      <img src="<%= n.mediaUrl %>">
-    <% } %>
-
-   <div class="title"><%= n.title %></div>
-
-   <div class="news-date">
-   🕒 <%= new Date(n.date).toLocaleString("fr-FR") %>
+  <!-- ===== HEADER ===== -->
+  <header>
+    <div class="header-title notranslate">NEWS LIVE</div>
+    <div class="menu-btn" onclick="toggleMenu()">☰</div>
+    <div id="menu" class="menu">
+      <select id="languageSelect" onchange="changeLanguage(); closeMenu();">
+        <option value="fr">🇫🇷 Français</option>
+        <option value="en">🇬🇧 English</option>
+        <option value="es">🇪🇸 Español</option>
+        <option value="pt">🇵🇹 Português</option>
+      </select>
+      <a href="mailto:judeumba745@gmail.com?subject=Publicité NEWS LIVE">📢 Publicité</a>
     </div>
-    <div class="content"><%- n.content %></div>
+  </header>
 
-    <div class="actions">
-      <button onclick="like('<%= n.id %>', this)">👍 <%= n.likes %></button>
-     <button onclick="toggleComment('<%= n.id %>')">💬 Commenter</button>
-      <button onclick="share('<%= n.link %>')">↗️</button>
-    </div>
+  <!-- ===== CONTENU ===== -->
+  <div class="container">
+    <% news.forEach(n => { %>
+      <div class="card" data-id="<%= n.id %>">
+        <% if(n.mediaType === 'video') { %>
+          <iframe src="<%= n.mediaUrl %>?autoplay=1&mute=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        <% } else if(n.mediaUrl) { %>
+          <img src="<%= n.mediaUrl %>">
+        <% } %>
+        
+        <div class="title"><%= n.title %></div>
+        <div class="news-date">🕒 <%= new Date(n.date).toLocaleString("fr-FR") %></div>
+        <div class="content"><%- n.content %></div>
+        
+        <div class="actions">
+          <button onclick="like('<%= n.id %>', this)">👍 <%= n.likes %></button>
+          <button onclick="toggleComment('<%= n.id %>')">💬 Commenter</button>
+          <button onclick="share('<%= n.link %>')">↗️</button>
+        </div>
 
+        <div class="comment-box" id="comment-<%= n.id %>" style="display:none;">
+          <textarea placeholder="Écrire un commentaire..." id="text-<%= n.id %>"></textarea>
+          <button onclick="sendComment('<%= n.id %>')">Envoyer</button>
+          <div id="list-<%= n.id %>"></div>
+        </div>
+      </div>
+    <% }) %>
   </div>
-<% }) %>
 
-</div>
-
-<div class="comment-box" id="comment-<%= n.id %>" style="display:none;">
+  <!-- ===== GOOGLE TRANSLATE ===== -->
+  <div id="google_translate_element"></div>
   
-  <textarea placeholder="Écrire un commentaire..." id="text-<%= n.id %>"></textarea>
-  
-  <button onclick="sendComment('<%= n.id %>')">
-    Envoyer
-  </button>
-
-  <div id="list-<%= n.id %>"></div>
-</div>
-
-<!-- ===== GOOGLE TRANSLATE ===== -->
-<div id="google_translate_element"></div>
-
-<script>
-function googleTranslateElementInit() {
-  new google.translate.TranslateElement({
-    pageLanguage: 'fr',
-    includedLanguages: 'fr,en,es,pt'
-  }, 'google_translate_element');
-}
-
-function changeLanguage() {
-  const lang = document.getElementById("languageSelect").value;
-  localStorage.setItem("lang", lang);
-
-  function apply() {
-    const combo = document.querySelector(".goog-te-combo");
-    if (combo) {
-      combo.value = lang;
-      combo.dispatchEvent(new Event("change"));
-    } else {
-      setTimeout(apply, 500);
+  <script>
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'fr',
+        includedLanguages: 'fr,en,es,pt'
+      }, 'google_translate_element');
     }
-  }
-  apply();
-}
 
-window.onload = () => {
-  const lang = localStorage.getItem("lang") || "fr";
-  document.getElementById("languageSelect").value = lang;
-  setTimeout(changeLanguage, 1000);
-};
-</script>
+    function changeLanguage() {
+      const lang = document.getElementById("languageSelect").value;
+      localStorage.setItem("lang", lang);
+      function apply() {
+        const combo = document.querySelector(".goog-te-combo");
+        if (combo) {
+          combo.value = lang;
+          combo.dispatchEvent(new Event("change"));
+        } else {
+          setTimeout(apply, 500);
+        }
+      }
+      apply();
+    }
 
-<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    window.onload = () => {
+      const lang = localStorage.getItem("lang") || "fr";
+      document.getElementById("languageSelect").value = lang;
+      setTimeout(changeLanguage, 1000);
+    };
+  </script>
+  <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-<script>
-async function like(id, btn){
-  const res = await fetch("/like", {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({id})
-  });
+  <script>
+    async function like(id, btn) {
+      const res = await fetch("/like", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({id})
+      });
+      const data = await res.json();
+      btn.innerText = "👍 " + data.likes;
+    }
 
-  const data = await res.json();
-  btn.innerText = "👍 " + data.likes;
-}
+    function toggleComment(id) {
+      const box = document.getElementById("comment-" + id);
+      if (box.style.display === "none") {
+        box.style.display = "block";
+        loadComments(id);
+      } else {
+        box.style.display = "none";
+      }
+    }
 
-function toggleComment(id) {
-  const box = document.getElementById("comment-" + id);
+    async function sendComment(id) {
+      const text = document.getElementById("text-" + id).value;
+      if (!text) return;
+      await fetch("/comment", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({id, text})
+      });
+      document.getElementById("text-" + id).value = "";
+      loadComments(id);
+    }
 
-  if (box.style.display === "none") {
-    box.style.display = "block";
-    loadComments(id);
-  } else {
-    box.style.display = "none";
-  }
-}
+    async function loadComments(id) {
+      const res = await fetch("/reactions/" + id);
+      const data = await res.json();
+      const list = document.getElementById("list-" + id);
+      list.innerHTML = data.comments.map(c => 
+        `<div style="padding:5px;border-bottom:1px solid #eee;">💬 ${c.text}</div>`
+      ).join("");
+    }
 
-async function sendComment(id) {
-  const text = document.getElementById("text-" + id).value;
+    function share(link) {
+      if (navigator.share) {
+        navigator.share({url: link});
+      } else {
+        navigator.clipboard.writeText(link);
+        alert("Lien copié !");
+      }
+    }
 
-  if (!text) return;
+    function toggleMenu() {
+      const menu = document.getElementById("menu");
+      menu.style.display = menu.style.display === "block" ? "none" : "block";
+    }
 
-  await fetch("/comment", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ id, text })
-  });
+    function closeMenu() {
+      document.getElementById("menu").style.display = "none";
+    }
+  </script>
 
-  document.getElementById("text-" + id).value = "";
-
-  loadComments(id);
-}
-
-async function loadComments(id) {
-  const res = await fetch("/reactions/" + id);
-  const data = await res.json();
-
-  const list = document.getElementById("list-" + id);
-
-  list.innerHTML = data.comments.map(c =>
-    `<div style="padding:5px;border-bottom:1px solid #eee;">
-      💬 ${c.text}
-    </div>`
-  ).join("");
-}
-
-function share(link){
-  if(navigator.share){
-    navigator.share({url:link});
-  } else {
-    navigator.clipboard.writeText(link);
-    alert("Lien copié !");
-  }
-}
-</script>
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js")
-      .then(() => console.log("PWA activée 🚀"))
-      .catch(err => console.log("Erreur PWA", err));
-  });
-}
-</script>
-<script>console.log("SW support:", "serviceWorker" in navigator);</script>
-<script>
-function toggleMenu(){
-  const menu=document.getElementById("menu");
-
-  if(menu.style.display==="block"){
-    menu.style.display="none";
-  }else{
-    menu.style.display="block";
-  }
-}
-
-function closeMenu(){
-  document.getElementById("menu").style.display="none";
-}
-</script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js")
+          .then(() => console.log("PWA activée 🚀"))
+          .catch(err => console.log("Erreur PWA", err));
+      });
+    }
+  </script>
 </body>
 </html>
