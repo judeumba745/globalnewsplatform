@@ -12,6 +12,8 @@ app.set("view engine", "ejs");
 app.use(express.static("public"));
 
 let news = [];
+const NEWS_FILE = "./news.json";
+
 let likes = {};
 let comments = {};
 
@@ -32,6 +34,18 @@ function loadData() {
   }
 }
 loadData();
+
+function loadNewsHistory() {
+  if (fs.existsSync(NEWS_FILE)) {
+    news = JSON.parse(fs.readFileSync(NEWS_FILE));
+  }
+}
+
+function saveNewsHistory() {
+  fs.writeFileSync(NEWS_FILE, JSON.stringify(news, null, 2));
+}
+
+loadNewsHistory();
 
 // =======================
 // RSS SOURCES
@@ -102,6 +116,10 @@ async function loadNews() {
         if (!likes[item.link]) likes[item.link] = 0;
         if (!comments[item.link]) comments[item.link] = [];
 
+        const alreadyExists = news.find(n => n.id === item.link);
+
+        if (alreadyExists) continue;
+
         allNews.push({
           id: item.link,
           title: item.title,
@@ -120,9 +138,18 @@ async function loadNews() {
     }
   }
 
-  news = allNews
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
-    .slice(0, 30);
+ news = [...news, ...allNews];
+
+const now = Date.now();
+
+news = news.filter(article => {
+  const age = now - new Date(article.date).getTime();
+  return age < 30 * 24 * 60 * 60 * 1000;
+});
+
+news.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+saveNewsHistory();
 
   console.log("News chargées:", news.length);
 }
