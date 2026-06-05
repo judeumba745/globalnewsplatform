@@ -6,8 +6,6 @@
   <title>Global News</title>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#0d0d0d">
-  
-  <!-- iOS support -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <link rel="apple-touch-icon" href="/icon.png">
@@ -125,35 +123,55 @@
       to { transform: scale(1.05); }
     }
 
+    /* Style Facebook pour reactions */
+    .react-info {
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #65676b;
+      border-bottom: 1px solid #e4e6eb;
+    }
+
     .actions {
       display: flex;
       justify-content: space-around;
-      padding: 10px;
-      border-top: 1px solid #eee;
+      padding: 6px 0;
     }
 
     .actions button {
       background: none;
       border: none;
-      font-size: 14px;
-      font-weight: bold;
-      color: #555;
+      font-size: 15px;
+      font-weight: 600;
+      color: #65676b;
+      padding: 8px 20px;
+      border-radius: 6px;
       cursor: pointer;
+      flex: 1;
+    }
+
+    .actions button:hover {
+      background: #f2f3f5;
+    }
+
+    .actions button.active {
+      color: #1877f2;
     }
 
     .comment-box {
       background: #f7f7f7;
       padding: 10px;
       border-top: 1px solid #ddd;
+      display: none;
     }
 
     .comment-box textarea {
       width: 100%;
-      height: 60px;
+      height: 50px;
       padding: 8px;
-      border-radius: 8px;
+      border-radius: 18px;
       border: 1px solid #ccc;
       resize: none;
+      font-size: 14px;
     }
 
     .comment-box button {
@@ -161,12 +179,20 @@
       background: #1877f2;
       color: white;
       border: none;
-      padding: 8px;
+      padding: 8px 16px;
       border-radius: 6px;
       cursor: pointer;
+      font-weight: bold;
     }
 
-    /* Google Translate caché propre */
+    .comment {
+      background: #f2f3f5;
+      padding: 8px 12px;
+      border-radius: 18px;
+      margin: 5px 0;
+      font-size: 14px;
+    }
+
     #google_translate_element {
       position: fixed;
       bottom: 10px;
@@ -180,7 +206,6 @@
 </head>
 <body>
 
-  <!-- ===== HEADER ===== -->
   <header>
     <div class="header-title notranslate">NEWS LIVE</div>
     <div class="menu-btn" onclick="toggleMenu()">☰</div>
@@ -195,7 +220,6 @@
     </div>
   </header>
 
-  <!-- ===== CONTENU ===== -->
   <div class="container">
     <% news.forEach(n => { %>
       <div class="card" data-id="<%= n.id %>">
@@ -209,22 +233,25 @@
         <div class="news-date">🕒 <%= new Date(n.date).toLocaleString("fr-FR") %></div>
         <div class="content"><%- n.content %></div>
         
+        <div class="react-info">
+          👍 <%= n.likes %> personnes · 💬 <span id="count-<%= n.id %>">0</span> commentaires
+        </div>
+        
         <div class="actions">
-          <button onclick="like('<%= n.id %>', this)">👍 <%= n.likes %></button>
+          <button id="like-<%= n.id %>" onclick="like('<%= n.id %>', this)">👍 J’aime</button>
           <button onclick="toggleComment('<%= n.id %>')">💬 Commenter</button>
-          <button onclick="share('<%= n.link %>')">↗️</button>
+          <button onclick="share('<%= n.link %>')">↗️ Partager</button>
         </div>
 
-        <div class="comment-box" id="comment-<%= n.id %>" style="display:none;">
+        <div class="comment-box" id="comment-<%= n.id %>">
+          <div id="list-<%= n.id %>"></div>
           <textarea placeholder="Écrire un commentaire..." id="text-<%= n.id %>"></textarea>
           <button onclick="sendComment('<%= n.id %>')">Envoyer</button>
-          <div id="list-<%= n.id %>"></div>
         </div>
       </div>
     <% }) %>
   </div>
 
-  <!-- ===== GOOGLE TRANSLATE ===== -->
   <div id="google_translate_element"></div>
   
   <script>
@@ -254,6 +281,10 @@
       const lang = localStorage.getItem("lang") || "fr";
       document.getElementById("languageSelect").value = lang;
       setTimeout(changeLanguage, 1000);
+      // Charger les commentaires pour chaque post
+      <% news.forEach(n => { %>
+        loadComments('<%= n.id %>');
+      <% }) %>
     };
   </script>
   <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
@@ -266,12 +297,13 @@
         body: JSON.stringify({id})
       });
       const data = await res.json();
-      btn.innerText = "👍 " + data.likes;
+      btn.innerText = "👍 J’aime";
+      btn.classList.add("active"); // devient bleu comme Facebook
     }
 
     function toggleComment(id) {
       const box = document.getElementById("comment-" + id);
-      if (box.style.display === "none") {
+      if (box.style.display === "none" || box.style.display === "") {
         box.style.display = "block";
         loadComments(id);
       } else {
@@ -295,9 +327,13 @@
       const res = await fetch("/reactions/" + id);
       const data = await res.json();
       const list = document.getElementById("list-" + id);
+      const count = document.getElementById("count-" + id);
+      
       list.innerHTML = data.comments.map(c => 
-        `<div style="padding:5px;border-bottom:1px solid #eee;">💬 ${c.text}</div>`
+        `<div class="comment">💬 ${c.text}</div>`
       ).join("");
+      
+      count.innerText = data.comments.length;
     }
 
     function share(link) {
